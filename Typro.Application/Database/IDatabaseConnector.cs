@@ -2,7 +2,7 @@
 
 namespace Typro.Application.Database;
 
-public interface IDatabaseConnector
+public interface IDatabaseConnector : IDisposable
 {
     IDbConnection CreateConnection();
 }
