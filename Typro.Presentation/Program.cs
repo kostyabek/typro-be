@@ -1,3 +1,5 @@
+using MediatR;
+using Typro.Application;
 using Typro.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +12,8 @@ builder.Services
     .AddJwtAuthentication(builder.Configuration)
     .AddDatabaseConnector(builder.Configuration)
     .AddRepositories()
-    .AddCustomServices();
+    .AddServices()
+    .AddMediatR(typeof(MediatrEntryPoint).Assembly);
 
 var app = builder.Build();
 

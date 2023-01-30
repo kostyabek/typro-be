@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Typro.Application.CQRS.Auth;
+using Typro.Presentation.Extensions;
 using Typro.Presentation.Models.Request;
-using Typro.Presentation.Models.Response;
 
 namespace Typro.Presentation.Controllers;
 
@@ -8,9 +10,24 @@ namespace Typro.Presentation.Controllers;
 [Route("auth")]
 public class AuthController : ControllerBase
 {
-    [HttpPost("sign-up")]
-    public async Task<ActionResult<UserSignUpResponseModel>> SignUpAsync(UserSignUpRequestModel request)
+    private readonly IMediator _mediator;
+
+    public AuthController(IMediator mediator)
     {
-        throw new NotImplementedException();
+        _mediator = mediator;
+    }
+
+    [HttpPost("sign-up")]
+    public async Task<IActionResult> SignUpAsync(UserSignUpRequestModel request)
+    {
+        var command = new UserSignUpCommand
+        {
+            Email = request.Email,
+            Password = request.Password,
+            ConfirmPassword = request.ConfirmPassword
+        };
+
+        var result = await _mediator.Send(command);
+        return result.ToActionResult();
     }
 }

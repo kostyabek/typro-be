@@ -35,9 +35,9 @@ public static class ServiceCollectionExtensions
         return services;
     }
     
-    public static IServiceCollection AddCustomServices(this IServiceCollection services)
+    public static IServiceCollection AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
