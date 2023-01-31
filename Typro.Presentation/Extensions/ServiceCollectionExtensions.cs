@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Typro.Application.Database;
 using Typro.Application.Repositories;
-using Typro.Application.Services;
 using Typro.Infrastructure.Database;
 using Typro.Infrastructure.Repositories;
-using Typro.Infrastructure.Services;
 
 namespace Typro.Presentation.Extensions;
 
@@ -31,13 +29,6 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
-
-        return services;
-    }
-    
-    public static IServiceCollection AddServices(this IServiceCollection services)
-    {
-        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
