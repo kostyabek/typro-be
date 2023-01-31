@@ -12,7 +12,6 @@ builder.Services
     .AddJwtAuthentication(builder.Configuration)
     .AddDatabaseConnector(builder.Configuration)
     .AddRepositories()
-    .AddServices()
     .AddMediatR(typeof(MediatrEntryPoint).Assembly);
 
 var app = builder.Build();
