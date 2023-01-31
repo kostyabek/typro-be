@@ -21,7 +21,6 @@ public class DatabaseConnector : IDatabaseConnector
 
     public void Dispose()
     {
-        Console.WriteLine("=====IS DISPOSE=====");
         _dbConnection?.Close();
         _dbConnection?.Dispose();
     }
