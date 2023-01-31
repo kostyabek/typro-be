@@ -1,24 +1,19 @@
-﻿using System.Text;
-using FluentResults;
+﻿using FluentResults;
 using MediatR;
 using Typro.Application.Models.User;
 using Typro.Application.Repositories;
-using Typro.Application.Services;
 using Typro.Domain.Models.Result.Errors;
 
-namespace Typro.Application.CQRS.Auth;
+namespace Typro.Application.CQRS.Auth.UserSignUp;
 
 public class UserSignUpCommandHandler : IRequestHandler<UserSignUpCommand, Result<UserGeneralInfoModel>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IAuthService _authService;
 
     public UserSignUpCommandHandler(
-        IUserRepository userRepository,
-        IAuthService authService)
+        IUserRepository userRepository)
     {
         _userRepository = userRepository;
-        _authService = authService;
     }
 
     public async Task<Result<UserGeneralInfoModel>> Handle(UserSignUpCommand request,
@@ -30,12 +25,11 @@ public class UserSignUpCommandHandler : IRequestHandler<UserSignUpCommand, Resul
             return Result.Fail(new InvalidOperationError("The user already exists."));
         }
 
-        _authService.GeneratePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+        var passwordHash = BC.HashPassword(request.Password);
         var createUserModel = new CreateUserModel
         {
             Email = request.Email,
-            PasswordHash = Encoding.UTF8.GetString(passwordHash),
-            PasswordSalt = Encoding.UTF8.GetString(passwordSalt)
+            PasswordHash = passwordHash
         };
 
         await _userRepository.CreateUserAsync(createUserModel);
@@ -46,6 +40,6 @@ public class UserSignUpCommandHandler : IRequestHandler<UserSignUpCommand, Resul
             Email = user.Email
         };
 
-        return userGeneralInfoModel;
+        return Result.Ok(userGeneralInfoModel);
     }
 }
