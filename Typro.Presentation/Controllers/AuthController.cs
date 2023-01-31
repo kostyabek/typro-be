@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Typro.Application.CQRS.Auth;
+using Typro.Application.CQRS.Auth.UserSignIn;
+using Typro.Application.CQRS.Auth.UserSignUp;
 using Typro.Presentation.Extensions;
 using Typro.Presentation.Models.Request;
 
@@ -20,12 +21,16 @@ public class AuthController : ControllerBase
     [HttpPost("sign-up")]
     public async Task<IActionResult> SignUpAsync(UserSignUpRequestModel request)
     {
-        var command = new UserSignUpCommand
-        {
-            Email = request.Email,
-            Password = request.Password,
-            ConfirmPassword = request.ConfirmPassword
-        };
+        var command = new UserSignUpCommand(request.Email, request.Password, request.ConfirmPassword);
+
+        var result = await _mediator.Send(command);
+        return result.ToActionResult();
+    }
+    
+    [HttpPost("sign-in")]
+    public async Task<IActionResult> SignInAsync(UserSignInRequestModel request)
+    {
+        var command = new UserSignInCommand(request.Email, request.Password);
 
         var result = await _mediator.Send(command);
         return result.ToActionResult();
