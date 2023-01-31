@@ -23,12 +23,12 @@ public class UserRepository : DatabaseConnectable, IUserRepository
     public Task<User?> GetUserByIdAsync(int id)
     {
         var connection = DatabaseConnector.CreateConnection();
-        return connection.QuerySingleAsync<User?>(UserQueries.GetUserById, new { UserId = id });
+        return connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserById, new { UserId = id });
     }
 
     public Task<User?> GetUserByEmailAsync(string email)
     {
         var connection = DatabaseConnector.CreateConnection();
-        return connection.QuerySingleAsync<User?>(UserQueries.GetUserByEmail, new { UserEmail = email });
+        return connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserByEmail, new { UserEmail = email });
     }
 }
