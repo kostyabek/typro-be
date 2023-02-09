@@ -16,19 +16,19 @@ public class UserRepository : DatabaseConnectable, IUserRepository
     
     public Task<int> CreateUserAsync(CreateUserModel model)
     {
-        var connection = DatabaseConnector.CreateConnection();
+        var connection = DatabaseConnector.GetConnection();
         return connection.ExecuteAsync(UserQueries.InsertUser, model);
     }
 
     public Task<User?> GetUserByIdAsync(int id)
     {
-        var connection = DatabaseConnector.CreateConnection();
+        var connection = DatabaseConnector.GetConnection();
         return connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserById, new { UserId = id });
     }
 
     public Task<User?> GetUserByEmailAsync(string email)
     {
-        var connection = DatabaseConnector.CreateConnection();
+        var connection = DatabaseConnector.GetConnection();
         return connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserByEmail, new { UserEmail = email });
     }
 }

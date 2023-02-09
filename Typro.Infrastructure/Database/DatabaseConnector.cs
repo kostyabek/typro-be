@@ -10,18 +10,11 @@ public class DatabaseConnector : IDatabaseConnector
     private IDbConnection? _dbConnection;
 
     public DatabaseConnector(string connectionString)
-    {
-        _connectionString = connectionString;
-    }
+        => _connectionString = connectionString;
 
-    public IDbConnection CreateConnection()
-    {
-        return _dbConnection ??= new SqlConnection(_connectionString);
-    }
+    public IDbConnection GetConnection()
+        => _dbConnection ??= new SqlConnection(_connectionString);
 
     public void Dispose()
-    {
-        _dbConnection?.Close();
-        _dbConnection?.Dispose();
-    }
+        => _dbConnection?.Close();
 }

@@ -4,5 +4,5 @@ namespace Typro.Application.Database;
 
 public interface IDatabaseConnector : IDisposable
 {
-    IDbConnection CreateConnection();
+    IDbConnection GetConnection();
 }
