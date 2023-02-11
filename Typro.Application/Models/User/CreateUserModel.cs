@@ -1,7 +1,5 @@
-﻿namespace Typro.Application.Models.User;
+﻿using Typro.Domain.Enums;
 
-public record CreateUserModel
-{
-    public string Email { get; init; }
-    public string PasswordHash { get; init; }
-}
+namespace Typro.Application.Models.User;
+
+public record CreateUserDto(string Email, string PasswordHash, UserRole RoleId);
