@@ -13,10 +13,10 @@ namespace Typro.Infrastructure.Services;
 
 public class TokenService : ITokenService
 {
-    private readonly JwtOptions _jwtOptions;
+    private readonly TokenOptions _jwtOptions;
     private readonly IUserRepository _userRepository;
 
-    public TokenService(IOptions<JwtOptions> jwtOptions, IUserRepository userRepository)
+    public TokenService(IOptions<TokenOptions> jwtOptions, IUserRepository userRepository)
     {
         _userRepository = userRepository;
         _jwtOptions = jwtOptions.Value;

@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         var issuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration
-            .GetSection($"{JwtOptions.SectionName}:{nameof(JwtOptions.SecretKey)}").Value));
+            .GetSection($"{TokenOptions.SectionName}:{nameof(TokenOptions.SecretKey)}").Value));
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(o =>
             {
@@ -61,7 +61,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<TokenOptions>(configuration.GetSection(TokenOptions.SectionName));
 
         return services;
     }
