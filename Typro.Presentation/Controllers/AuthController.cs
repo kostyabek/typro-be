@@ -1,7 +1,6 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using Typro.Application.CQRS.Auth.UserSignIn;
-using Typro.Application.CQRS.Auth.UserSignUp;
+﻿using Microsoft.AspNetCore.Mvc;
+using Typro.Application.Models.Auth;
+using Typro.Application.Services;
 using Typro.Presentation.Extensions;
 using Typro.Presentation.Models.Request;
 
@@ -11,28 +10,26 @@ namespace Typro.Presentation.Controllers;
 [Route("auth")]
 public class AuthController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly IAuthService _authService;
 
-    public AuthController(IMediator mediator)
+    public AuthController(IAuthService authService)
     {
-        _mediator = mediator;
+        _authService = authService;
     }
 
     [HttpPost("sign-up")]
-    public async Task<IActionResult> SignUpAsync(UserSignUpRequestModel request)
+    public async Task<IActionResult> SignUpAsync(UserSignUpRequest request)
     {
-        var command = new UserSignUpCommand(request.Email, request.Password, request.ConfirmPassword);
-
-        var result = await _mediator.Send(command);
+        var dto = new UserSignUpDto(request.Email, request.Password);
+        var result = await _authService.SignUpAsync(dto);
         return result.ToActionResult();
     }
     
     [HttpPost("sign-in")]
-    public async Task<IActionResult> SignInAsync(UserSignInRequestModel request)
+    public async Task<IActionResult> SignInAsync(UserSignInRequest request)
     {
-        var command = new UserSignInCommand(request.Email, request.Password);
-
-        var result = await _mediator.Send(command);
+        var dto = new UserSignInDto(request.Email, request.Password);
+        var result = await _authService.SignInAsync(dto);
         return result.ToActionResult();
     }
 }

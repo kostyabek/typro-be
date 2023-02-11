@@ -1,5 +1,3 @@
-using MediatR;
-using Typro.Application;
 using Typro.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,11 +6,12 @@ builder.Services.AddControllers();
 
 builder.Services
     .AddEndpointsApiExplorer()
-    .AddSwaggerGen()
+    .AddSwagger()
     .AddJwtAuthentication(builder.Configuration)
-    .AddDatabaseConnector(builder.Configuration)
+    .AddDatabaseConnection(builder.Configuration)
     .AddRepositories()
-    .AddMediatR(typeof(MediatrEntryPoint).Assembly);
+    .AddOptions(builder.Configuration)
+    .AddServices();
 
 var app = builder.Build();
 
