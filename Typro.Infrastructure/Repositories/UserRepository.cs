@@ -1,5 +1,5 @@
-﻿using Dapper;
-using Typro.Application.Database;
+﻿using System.Data;
+using Dapper;
 using Typro.Application.Models.User;
 using Typro.Application.Queries;
 using Typro.Application.Repositories;
@@ -10,25 +10,16 @@ namespace Typro.Infrastructure.Repositories;
 
 public class UserRepository : DatabaseConnectable, IUserRepository
 {
-    public UserRepository(IDatabaseConnector databaseConnector) : base(databaseConnector)
+    public UserRepository(IDbConnection dbConnection) : base(dbConnection)
     {
     }
-    
-    public Task<int> CreateUserAsync(CreateUserModel model)
-    {
-        var connection = DatabaseConnector.GetConnection();
-        return connection.ExecuteAsync(UserQueries.InsertUser, model);
-    }
+
+    public Task<int> CreateUserAsync(CreateUserDto model)
+        => Connection.ExecuteAsync(UserQueries.InsertUser, model, Transaction);
 
     public Task<User?> GetUserByIdAsync(int id)
-    {
-        var connection = DatabaseConnector.GetConnection();
-        return connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserById, new { UserId = id });
-    }
+        => Connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserById, new { UserId = id }, Transaction);
 
     public Task<User?> GetUserByEmailAsync(string email)
-    {
-        var connection = DatabaseConnector.GetConnection();
-        return connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserByEmail, new { UserEmail = email });
-    }
+        => Connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserByEmail, new { UserEmail = email }, Transaction);
 }

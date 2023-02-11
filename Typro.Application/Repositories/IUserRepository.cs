@@ -3,9 +3,9 @@ using Typro.Domain.Database.Models;
 
 namespace Typro.Application.Repositories;
 
-public interface IUserRepository
+public interface IUserRepository : IRepository
 {
-    Task<int> CreateUserAsync(CreateUserModel user);
+    Task<int> CreateUserAsync(CreateUserDto user);
     Task<User?> GetUserByIdAsync(int id);
     Task<User?> GetUserByEmailAsync(string email);
 }
