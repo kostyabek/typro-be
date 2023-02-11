@@ -53,7 +53,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ICookieService, CookieService>();
 
         return services;
     }

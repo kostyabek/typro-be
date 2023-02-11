@@ -2,8 +2,9 @@
 
 public static class UserQueries
 {
-    public const string InsertUser = @"
+    public const string CreateUser = @"
 INSERT INTO Users(Email, PasswordHash, RoleId)
+OUTPUT INSERTED.Id
 VALUES (@Email, @PasswordHash, @RoleId);";
 
     public const string GetUserById = @"

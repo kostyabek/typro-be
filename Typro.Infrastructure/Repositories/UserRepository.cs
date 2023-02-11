@@ -15,11 +15,14 @@ public class UserRepository : DatabaseConnectable, IUserRepository
     }
 
     public Task<int> CreateUserAsync(CreateUserDto model)
-        => Connection.ExecuteAsync(UserQueries.InsertUser, model, Transaction);
+        => Connection.ExecuteScalarAsync<int>(UserQueries.CreateUser, model, Transaction);
 
     public Task<User?> GetUserByIdAsync(int id)
         => Connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserById, new { UserId = id }, Transaction);
 
     public Task<User?> GetUserByEmailAsync(string email)
         => Connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserByEmail, new { UserEmail = email }, Transaction);
+
+    public Task<int> CreateRefreshTokenAsync(RefreshToken model)
+        => Connection.ExecuteAsync(RefreshTokenQueries.CreateRefreshToken, model, Transaction);
 }

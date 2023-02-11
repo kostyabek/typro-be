@@ -11,12 +11,17 @@ namespace Typro.Infrastructure.Services;
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IJwtService _jwtService;
+    private readonly ITokenService _tokenService;
+    private readonly ICookieService _cookieService;
 
-    public AuthService(IUserRepository userRepository, IJwtService jwtService)
+    public AuthService(
+        IUserRepository userRepository,
+        ITokenService tokenService,
+        ICookieService cookieService)
     {
         _userRepository = userRepository;
-        _jwtService = jwtService;
+        _tokenService = tokenService;
+        _cookieService = cookieService;
     }
 
     public async Task<Result<UserSignUpResponseDto>> SignUpAsync(UserSignUpDto dto)
@@ -33,20 +38,25 @@ public class AuthService : IAuthService
         using var transaction = _userRepository.BeginTransaction();
         try
         {
-            await _userRepository.CreateUserAsync(createUserModel);
+            var insertedUserId = await _userRepository.CreateUserAsync(createUserModel);
 
             user = await _userRepository.GetUserByEmailAsync(dto.Email);
-        
-            var jwt = _jwtService.GenerateToken(user);
-            transaction.Commit();
-            var responseDto = new UserSignUpResponseDto(jwt);
 
+            var accessToken = _tokenService.GenerateAccessToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken(insertedUserId);
+            await _userRepository.CreateRefreshTokenAsync(refreshToken);
+            transaction.Commit();
+
+            var refreshTokenDto = new RefreshTokenDto(refreshToken.Token, refreshToken.ExpirationDate);
+            _cookieService.SetRefreshTokenCookie(refreshTokenDto);
+            
+            var responseDto = new UserSignUpResponseDto(accessToken);
             return Result.Ok(responseDto);
         }
         catch (Exception e)
         {
             transaction.Rollback();
-            return Result.Fail(e.Message);
+            throw;
         }
     }
 
@@ -63,11 +73,21 @@ public class AuthService : IAuthService
         {
             return Result.Fail(new InvalidOperationError("Invalid login/password."));
         }
+
+        var accessToken = _tokenService.GenerateAccessToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
+        await _userRepository.CreateRefreshTokenAsync(refreshToken);
+
+        var refreshTokenDto = new RefreshTokenDto(refreshToken.Token, refreshToken.ExpirationDate);
+        _cookieService.SetRefreshTokenCookie(refreshTokenDto);
         
-        var jwt = _jwtService.GenerateToken(user);
-
-        var responseDto = new UserSignInResponseDto(jwt);
-
+        var responseDto = new UserSignInResponseDto(accessToken);
         return Result.Ok(responseDto);
+    }
+    
+    public Result SignOutAsync()
+    {
+        _cookieService.RemoveRefreshTokenCookie();
+        return Result.Ok();
     }
 }

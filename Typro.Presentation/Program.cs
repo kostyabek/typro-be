@@ -11,7 +11,8 @@ builder.Services
     .AddDatabaseConnection(builder.Configuration)
     .AddRepositories()
     .AddOptions(builder.Configuration)
-    .AddServices();
+    .AddServices()
+    .AddHttpContextAccessor();
 
 var app = builder.Build();
 

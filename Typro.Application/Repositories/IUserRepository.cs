@@ -8,4 +8,5 @@ public interface IUserRepository : IRepository
     Task<int> CreateUserAsync(CreateUserDto user);
     Task<User?> GetUserByIdAsync(int id);
     Task<User?> GetUserByEmailAsync(string email);
+    Task<int> CreateRefreshTokenAsync(RefreshToken model);
 }
