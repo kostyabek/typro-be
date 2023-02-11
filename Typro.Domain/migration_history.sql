@@ -36,3 +36,22 @@ VALUES ('user');
 ALTER TABLE Users
     ADD RoleId int NOT NULL
         FOREIGN KEY (RoleId) REFERENCES Roles (Id)
+GO
+
+-- Add RefreshTokens table
+IF NOT EXISTS(SELECT *
+              FROM sysobjects
+              WHERE name = 'RefreshTokens'
+                and xtype = 'U')
+CREATE TABLE RefreshTokens
+(
+    Id             int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
+    UserId         int                             NOT NULL,
+    Token          varchar(255)                    NOT NULL,
+    CreatedDate    datetime2                       NOT NULL,
+    ExpirationDate datetime2                       NOT NULL,
+    IsRevoked      bit                             NOT NULL DEFAULT 0,
+    FOREIGN KEY (UserId) REFERENCES Users (Id),
+    UNIQUE (UserId, Token)
+)
+GO
