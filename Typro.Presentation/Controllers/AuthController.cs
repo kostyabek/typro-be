@@ -14,13 +14,16 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
 
     private readonly IValidator<UserSignUpRequest> _signUpRequestValidator;
+    private readonly IValidator<UserSignInRequest> _signInRequestValidator;
 
     public AuthController(
         IAuthService authService,
-        IValidator<UserSignUpRequest> signUpRequestValidator)
+        IValidator<UserSignUpRequest> signUpRequestValidator,
+        IValidator<UserSignInRequest> signInRequestValidator)
     {
         _authService = authService;
         _signUpRequestValidator = signUpRequestValidator;
+        _signInRequestValidator = signInRequestValidator;
     }
 
     [HttpPost("sign-up")]
@@ -31,6 +34,7 @@ public class AuthController : ControllerBase
         {
             return validationResult.ToActionResult();
         }
+        
         var dto = new UserSignUpDto(request.Email, request.Password);
         var result = await _authService.SignUpAsync(dto);
 
@@ -40,6 +44,12 @@ public class AuthController : ControllerBase
     [HttpPost("sign-in")]
     public async Task<IActionResult> SignInAsync(UserSignInRequest request)
     {
+        var validationResult = await _signInRequestValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToActionResult();
+        }
+        
         var dto = new UserSignInDto(request.Email, request.Password);
         var result = await _authService.SignInAsync(dto);
         return result.ToActionResult();
