@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -9,6 +10,8 @@ using Typro.Application.Repositories;
 using Typro.Application.Services;
 using Typro.Infrastructure.Repositories;
 using Typro.Infrastructure.Services;
+using Typro.Presentation.Models.Request;
+using Typro.Presentation.Validators.Auth;
 
 namespace Typro.Presentation.Extensions;
 
@@ -94,6 +97,13 @@ public static class ServiceCollectionExtensions
                 }
             });
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddFluentValidators(this IServiceCollection services)
+    {
+        services.AddScoped<IValidator<UserSignUpRequest>, UserSignUpRequestValidator>();
 
         return services;
     }

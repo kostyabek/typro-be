@@ -1,4 +1,6 @@
 ﻿using FluentResults;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Typro.Application.Models.Auth;
 using Typro.Application.Services;
@@ -13,14 +15,24 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
 
-    public AuthController(IAuthService authService)
+    private readonly IValidator<UserSignUpRequest> _signUpRequestValidator;
+
+    public AuthController(
+        IAuthService authService,
+        IValidator<UserSignUpRequest> signUpRequestValidator)
     {
         _authService = authService;
+        _signUpRequestValidator = signUpRequestValidator;
     }
 
     [HttpPost("sign-up")]
     public async Task<IActionResult> SignUpAsync(UserSignUpRequest request)
     {
+        var validationResult = await _signUpRequestValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToActionResult();
+        }
         var dto = new UserSignUpDto(request.Email, request.Password);
         var result = await _authService.SignUpAsync(dto);
 

@@ -12,7 +12,8 @@ builder.Services
     .AddRepositories()
     .AddOptions(builder.Configuration)
     .AddServices()
-    .AddHttpContextAccessor();
+    .AddHttpContextAccessor()
+    .AddFluentValidators();
 
 var app = builder.Build();
 
