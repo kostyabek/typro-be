@@ -1,6 +1,4 @@
-﻿using FluentResults;
-using FluentValidation;
-using FluentValidation.AspNetCore;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Typro.Application.Models.Auth;
 using Typro.Application.Services;

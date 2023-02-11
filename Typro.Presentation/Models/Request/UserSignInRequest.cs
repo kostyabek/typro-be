@@ -2,4 +2,4 @@
 
 namespace Typro.Presentation.Models.Request;
 
-public record UserSignInRequest(string Email, string Password) : CredentialsRequestModel(Email, Password);
+public record UserSignInRequest(string Email, string Password) : CredentialsRequest(Email, Password);

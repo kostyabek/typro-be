@@ -2,6 +2,6 @@
 
 namespace Typro.Presentation.Models.Request
 {
-    public record UserSignUpRequest
-        (string Email, string Password, string ConfirmPassword) : CredentialsRequestModel(Email, Password);
+    public record UserSignUpRequest(string Email, string Password, string ConfirmPassword) : CredentialsRequest(Email,
+        Password);
 }

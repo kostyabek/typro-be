@@ -20,8 +20,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services,
         IConfiguration configuration)
     {
-        var issuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration
-            .GetSection($"{TokenOptions.SectionName}:{nameof(TokenOptions.SecretKey)}").Value));
+        var issuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(
+                configuration.GetSection(
+                    $"{TokenOptions.SectionName}:{nameof(TokenOptions.SecretKey)}").Value));
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(o =>
             {
@@ -104,6 +107,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddFluentValidators(this IServiceCollection services)
     {
         services.AddScoped<IValidator<UserSignUpRequest>, UserSignUpRequestValidator>();
+        services.AddScoped<IValidator<UserSignInRequest>, UserSignInRequestValidator>();
 
         return services;
     }
