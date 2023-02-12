@@ -17,12 +17,6 @@ public class TokenRepository : DatabaseConnectable, ITokenRepository
         => ConnectionWrapper.Connection.ExecuteAsync(RefreshTokenQueries.CreateToken, model,
             ConnectionWrapper.Transaction);
 
-    public Task<int> RevokeRefreshTokenAsync(int userId, string token)
-        => ConnectionWrapper.Connection.ExecuteAsync(
-            RefreshTokenQueries.CreateToken,
-            new { UserId = userId, Token = token },
-            ConnectionWrapper.Transaction);
-
     public Task<RefreshToken?> GetRefreshTokenByTokenAsync(string token)
         => ConnectionWrapper.Connection.QuerySingleOrDefaultAsync<RefreshToken?>(
             RefreshTokenQueries.GetRefreshTokenByToken,
