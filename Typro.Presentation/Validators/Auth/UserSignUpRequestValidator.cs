@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using FluentValidation;
-using Typro.Presentation.Models.Request;
+using Typro.Presentation.Models.Request.Auth;
 
 namespace Typro.Presentation.Validators.Auth;
 
