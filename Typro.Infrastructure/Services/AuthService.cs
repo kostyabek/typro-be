@@ -97,7 +97,7 @@ public class AuthService : IAuthService
         if (!_cookieService.TryGetRefreshTokenFromCookie(out var refreshToken))
         {
             SignOut();
-            return Result.Fail(new InvalidOperationError("Invalid refresh token."));
+            return Result.Fail(new InvalidOperationError("Invalid token."));
         }
 
         var validationResult = await _tokenService.ValidateRefreshToken(refreshToken);

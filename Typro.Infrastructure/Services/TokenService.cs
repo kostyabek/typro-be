@@ -72,7 +72,7 @@ public class TokenService : ITokenService
         var refreshToken = await _unitOfWork.TokenRepository.GetRefreshTokenByTokenAsync(token);
         if (refreshToken is null || refreshToken.IsRevoked || refreshToken.ExpirationDate < DateTime.UtcNow)
         {
-            return Result.Fail(new InvalidOperationError("Invalid refresh token."));
+            return Result.Fail(new InvalidOperationError("Invalid token."));
         }
 
         return Result.Ok();
