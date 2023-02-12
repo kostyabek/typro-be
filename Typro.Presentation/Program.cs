@@ -9,7 +9,7 @@ builder.Services
     .AddSwagger()
     .AddJwtAuthentication(builder.Configuration)
     .AddDatabaseConnection(builder.Configuration)
-    .AddRepositories()
+    .AddUnitOfWork()
     .AddOptions(builder.Configuration)
     .AddServices()
     .AddHttpContextAccessor()
