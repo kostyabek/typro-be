@@ -1,9 +1,10 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Typro.Application.Models.Auth;
 using Typro.Application.Services;
 using Typro.Presentation.Extensions;
-using Typro.Presentation.Models.Request;
+using Typro.Presentation.Models.Request.Auth;
 
 namespace Typro.Presentation.Controllers;
 
@@ -56,9 +57,18 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("sign-out")]
+    [Authorize]
     public Task<IActionResult> SignOutAsync()
     {
-        var result = _authService.SignOutAsync();
+        var result = _authService.SignOut();
         return Task.FromResult(result.ToActionResult());
+    }
+    
+    [HttpPost("refresh-token")]
+    [Authorize]
+    public async Task<IActionResult> RefreshAccessTokenAsync()
+    {
+        var result = await _authService.RefreshAccessTokenAsync();
+        return result.ToActionResult();
     }
 }
