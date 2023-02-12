@@ -1,4 +1,5 @@
 using Typro.Presentation.Extensions;
+using Typro.Presentation.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.UseLockout();
 app.UseAuthorization();
 
 app.MapControllers();
