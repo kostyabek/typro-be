@@ -1,8 +1,8 @@
 ﻿using FluentResults;
 using Typro.Application.Models.Auth;
 using Typro.Application.Models.User;
-using Typro.Application.Repositories;
 using Typro.Application.Services;
+using Typro.Application.UnitsOfWork;
 using Typro.Domain.Enums;
 using Typro.Domain.Models.Result.Errors;
 
@@ -10,23 +10,26 @@ namespace Typro.Infrastructure.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ITokenService _tokenService;
     private readonly ICookieService _cookieService;
+    private readonly IUserIdentityService _userIdentityService;
 
     public AuthService(
-        IUserRepository userRepository,
+        IUnitOfWork unitOfWork,
         ITokenService tokenService,
-        ICookieService cookieService)
+        ICookieService cookieService,
+        IUserIdentityService userIdentityService)
     {
-        _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
         _tokenService = tokenService;
         _cookieService = cookieService;
+        _userIdentityService = userIdentityService;
     }
 
     public async Task<Result<UserSignUpResponseDto>> SignUpAsync(UserSignUpDto dto)
     {
-        var user = await _userRepository.GetUserByEmailAsync(dto.Email);
+        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
         if (user is not null)
         {
             return Result.Fail(new InvalidOperationError("The user already exists."));
@@ -35,34 +38,33 @@ public class AuthService : IAuthService
         var passwordHash = BC.HashPassword(dto.Password);
         var createUserModel = new CreateUserDto(dto.Email, passwordHash, UserRole.User);
 
-        using var transaction = _userRepository.BeginTransaction();
+        _unitOfWork.BeginTransaction();
         try
         {
-            var insertedUserId = await _userRepository.CreateUserAsync(createUserModel);
+            var insertedUserId = await _unitOfWork.UserRepository.CreateUserAsync(createUserModel);
 
-            user = await _userRepository.GetUserByEmailAsync(dto.Email);
+            user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
 
             var accessToken = _tokenService.GenerateAccessToken(user);
-            var refreshToken = _tokenService.GenerateRefreshToken(insertedUserId);
-            await _userRepository.CreateRefreshTokenAsync(refreshToken);
-            transaction.Commit();
+            var refreshToken = await _tokenService.GenerateRefreshTokenAsync(insertedUserId);
+            _unitOfWork.CommitTransaction();
 
             var refreshTokenDto = new RefreshTokenDto(refreshToken.Token, refreshToken.ExpirationDate);
             _cookieService.SetRefreshTokenCookie(refreshTokenDto);
-            
+
             var responseDto = new UserSignUpResponseDto(accessToken);
             return Result.Ok(responseDto);
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            transaction.Rollback();
+            _unitOfWork.RollbackTransaction();
             throw;
         }
     }
 
     public async Task<Result<UserSignInResponseDto>> SignInAsync(UserSignInDto dto)
     {
-        var user = await _userRepository.GetUserByEmailAsync(dto.Email);
+        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
         if (user is null)
         {
             return Result.Fail(new InvalidOperationError("Invalid login/password."));
@@ -75,19 +77,41 @@ public class AuthService : IAuthService
         }
 
         var accessToken = _tokenService.GenerateAccessToken(user);
-        var refreshToken = _tokenService.GenerateRefreshToken(user.Id);
-        await _userRepository.CreateRefreshTokenAsync(refreshToken);
+        var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.Id);
 
         var refreshTokenDto = new RefreshTokenDto(refreshToken.Token, refreshToken.ExpirationDate);
         _cookieService.SetRefreshTokenCookie(refreshTokenDto);
-        
+
         var responseDto = new UserSignInResponseDto(accessToken);
         return Result.Ok(responseDto);
     }
-    
-    public Result SignOutAsync()
+
+    public Result SignOut()
     {
         _cookieService.RemoveRefreshTokenCookie();
         return Result.Ok();
+    }
+
+    public async Task<Result<AccessTokenResponseDto>> RefreshAccessTokenAsync()
+    {
+        if (!_cookieService.TryGetRefreshTokenFromCookie(out var refreshToken))
+        {
+            SignOut();
+            return Result.Fail(new InvalidOperationError("Invalid refresh token."));
+        }
+
+        var validationResult = await _tokenService.ValidateRefreshToken(refreshToken);
+        if (validationResult.IsFailed)
+        {
+            SignOut();
+            return validationResult;
+        }
+
+        var userId = _userIdentityService.UserId;
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var accessToken = _tokenService.GenerateAccessToken(user);
+        var responseDto = new AccessTokenResponseDto(accessToken);
+
+        return Result.Ok(responseDto);
     }
 }
