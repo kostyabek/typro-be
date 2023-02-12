@@ -27,7 +27,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-app.UseLockout();
+app.UseJwtValidation();
 app.UseAuthorization();
 
 app.MapControllers();

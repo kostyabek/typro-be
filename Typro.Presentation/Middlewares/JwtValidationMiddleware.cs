@@ -6,11 +6,11 @@ using Typro.Application.UnitsOfWork;
 
 namespace Typro.Presentation.Middlewares;
 
-public class LockoutMiddleware
+public class JwtValidationMiddleware
 {
     private readonly RequestDelegate _next;
     
-    public LockoutMiddleware(RequestDelegate next)
+    public JwtValidationMiddleware(RequestDelegate next)
     {
         _next = next;
     }
@@ -46,6 +46,6 @@ public class LockoutMiddleware
 
 public static partial class WebApplicationExtensions
 {
-    public static IApplicationBuilder UseLockout(this WebApplication webApplication)
-        => webApplication.UseMiddleware<LockoutMiddleware>();
+    public static IApplicationBuilder UseJwtValidation(this WebApplication webApplication)
+        => webApplication.UseMiddleware<JwtValidationMiddleware>();
 }
