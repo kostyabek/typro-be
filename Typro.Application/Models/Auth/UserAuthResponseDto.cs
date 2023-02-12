@@ -1,3 +1,3 @@
 ﻿namespace Typro.Application.Models.Auth;
 
-public record UserAuthResponseDto(string AccessToken);
+public record AccessTokenResponseDto(string AccessToken);
