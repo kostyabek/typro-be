@@ -1,9 +1,11 @@
-﻿using Typro.Domain.Database.Models;
+﻿using FluentResults;
+using Typro.Domain.Database.Models;
 
 namespace Typro.Application.Services;
 
 public interface ITokenService
 {
     string GenerateAccessToken(User user);
-    RefreshToken GenerateRefreshToken(int userId);
+    Task<RefreshToken> GenerateRefreshTokenAsync(int userId);
+    Task<Result> ValidateRefreshToken(string token);
 }
