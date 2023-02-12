@@ -35,7 +35,7 @@ VALUES ('user');
 -- Add Role column to Users table
 ALTER TABLE Users
     ADD RoleId int NOT NULL
-        FOREIGN KEY (RoleId) REFERENCES Roles (Id)
+        CONSTRAINT FK_Roles_RoleId_Id FOREIGN KEY (RoleId) REFERENCES Roles (Id) ON DELETE NO ACTION
 GO
 
 -- Add RefreshTokens table
@@ -51,7 +51,7 @@ CREATE TABLE RefreshTokens
     CreatedDate    datetime2                       NOT NULL,
     ExpirationDate datetime2                       NOT NULL,
     IsRevoked      bit                             NOT NULL DEFAULT 0,
-    FOREIGN KEY (UserId) REFERENCES Users (Id),
-    UNIQUE (UserId, Token)
+    CONSTRAINT FK_Users_UserId_Id FOREIGN KEY (UserId) REFERENCES Users (Id) ON DELETE CASCADE,
+    CONSTRAINT UNIQ_UserId_Token UNIQUE (UserId, Token)
 )
 GO
