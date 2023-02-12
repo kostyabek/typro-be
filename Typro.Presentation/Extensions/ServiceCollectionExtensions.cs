@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Typro.Application.Models.Options;
-using Typro.Application.Repositories;
 using Typro.Application.Services;
-using Typro.Infrastructure.Repositories;
+using Typro.Application.UnitsOfWork;
 using Typro.Infrastructure.Services;
-using Typro.Presentation.Models.Request;
+using Typro.Infrastructure.UnitsOfWork;
+using Typro.Presentation.Models.Request.Auth;
 using Typro.Presentation.Validators.Auth;
 
 namespace Typro.Presentation.Extensions;
@@ -49,9 +49,9 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    public static IServiceCollection AddUnitOfWork(this IServiceCollection services)
     {
-        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
@@ -61,6 +61,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICookieService, CookieService>();
+        services.AddScoped<IUserIdentityService, UserIdentityService>();
 
         return services;
     }

@@ -1,29 +1,13 @@
-﻿using System.Data;
+﻿using Typro.Application.Models.Database;
 
 namespace Typro.Infrastructure.Database;
 
-public abstract class DatabaseConnectable : IDisposable
+public abstract class DatabaseConnectable
 {
-    protected IDbConnection Connection { get; }
-    protected IDbTransaction? Transaction { get; private set; }
-
-    protected DatabaseConnectable(IDbConnection dbConnection)
-        => Connection = dbConnection;
-
-    public IDbTransaction BeginTransaction()
+    protected ConnectionWrapper ConnectionWrapper { get; }
+    
+    protected DatabaseConnectable(ConnectionWrapper connectionWrapper)
     {
-        if (Connection.State == ConnectionState.Closed)
-        {
-            Connection.Open();
-        }
-        
-        Transaction = Connection.BeginTransaction();
-        return Transaction;
-    }
-
-    public void Dispose()
-    {
-        Transaction?.Dispose();
-        Connection.Dispose();
+        ConnectionWrapper = connectionWrapper;
     }
 }

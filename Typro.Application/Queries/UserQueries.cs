@@ -3,23 +3,25 @@
 public static class UserQueries
 {
     public const string CreateUser = @"
-INSERT INTO Users(Email, PasswordHash, RoleId)
+INSERT INTO dbo.Users(Email, PasswordHash, RoleId)
 OUTPUT INSERTED.Id
 VALUES (@Email, @PasswordHash, @RoleId);";
 
     public const string GetUserById = @"
 SELECT
-    u.Email,
-    u.PasswordHash,
-    u.RoleId
-FROM Users u
-WHERE u.Id = @UserId;";
+    Id,
+    Email,
+    PasswordHash,
+    RoleId
+FROM dbo.Users
+WHERE Id = @UserId;";
 
     public const string GetUserByEmail = @"
 SELECT
-    u.Email,
-    u.PasswordHash,
-    u.RoleId
-FROM Users u
-WHERE u.Email = @UserEmail;";
+    Id,
+    Email,
+    PasswordHash,
+    RoleId
+FROM dbo.Users 
+WHERE Email = @UserEmail;";
 }
