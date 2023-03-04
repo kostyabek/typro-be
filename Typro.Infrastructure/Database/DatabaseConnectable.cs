@@ -1,13 +1,13 @@
-﻿using Typro.Application.Database;
+﻿using Typro.Application.Models.Database;
 
 namespace Typro.Infrastructure.Database;
 
 public abstract class DatabaseConnectable
 {
-    protected readonly IDatabaseConnector DatabaseConnector;
-
-    protected DatabaseConnectable(IDatabaseConnector databaseConnector)
+    protected ConnectionWrapper ConnectionWrapper { get; }
+    
+    protected DatabaseConnectable(ConnectionWrapper connectionWrapper)
     {
-        DatabaseConnector = databaseConnector;
+        ConnectionWrapper = connectionWrapper;
     }
 }

@@ -7,12 +7,29 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Typro.Application\Typro.Application.csproj" />
+        <ProjectReference Include="..\Typro.Application\Typro.Application.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Dapper" Version="2.0.123" />
-      <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+        <PackageReference Include="Dapper" Version="2.0.123" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.0" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.15.1" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
+        <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="BCrypt.Net.BCrypt" Alias="BC" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
+        <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\7.0.2\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.AspNetCore.Http.Features">
+        <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\7.0.2\Microsoft.AspNetCore.Http.Features.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

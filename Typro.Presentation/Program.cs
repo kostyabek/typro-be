@@ -1,4 +1,5 @@
 using Typro.Presentation.Extensions;
+using Typro.Presentation.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,11 +7,14 @@ builder.Services.AddControllers();
 
 builder.Services
     .AddEndpointsApiExplorer()
-    .AddSwaggerGen()
+    .AddSwagger()
     .AddJwtAuthentication(builder.Configuration)
-    .AddDatabaseConnector(builder.Configuration)
-    .AddRepositories()
-    .AddCustomServices();
+    .AddDatabaseConnection(builder.Configuration)
+    .AddUnitOfWork()
+    .AddOptions(builder.Configuration)
+    .AddServices()
+    .AddHttpContextAccessor()
+    .AddFluentValidators();
 
 var app = builder.Build();
 
@@ -23,6 +27,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.UseJwtValidation();
 app.UseAuthorization();
 
 app.MapControllers();

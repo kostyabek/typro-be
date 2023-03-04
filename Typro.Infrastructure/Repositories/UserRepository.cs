@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using Typro.Application.Database;
+using Typro.Application.Models.Database;
 using Typro.Application.Models.User;
 using Typro.Application.Queries;
 using Typro.Application.Repositories;
@@ -10,25 +10,20 @@ namespace Typro.Infrastructure.Repositories;
 
 public class UserRepository : DatabaseConnectable, IUserRepository
 {
-    public UserRepository(IDatabaseConnector databaseConnector) : base(databaseConnector)
+    public UserRepository(ConnectionWrapper connectionWrapper) : base(connectionWrapper)
     {
     }
-    
-    public Task<int> CreateUserAsync(CreateUserModel model)
-    {
-        using var connection = DatabaseConnector.CreateConnection();
-        return connection.ExecuteAsync(UserQueries.InsertUser, model);
-    }
+
+    public Task<int> CreateUserAsync(CreateUserDto model)
+        => ConnectionWrapper.Connection.ExecuteScalarAsync<int>(UserQueries.CreateUser, model,
+            ConnectionWrapper.Transaction);
 
     public Task<User?> GetUserByIdAsync(int id)
-    {
-        using var connection = DatabaseConnector.CreateConnection();
-        return connection.QuerySingleAsync<User>(UserQueries.GetUserById, new { UserId = id });
-    }
+        => ConnectionWrapper.Connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserById,
+            new { UserId = id }, ConnectionWrapper.Transaction);
 
     public Task<User?> GetUserByEmailAsync(string email)
-    {
-        using var connection = DatabaseConnector.CreateConnection();
-        return connection.QuerySingleAsync<User>(UserQueries.GetUserByEmail, new { UserEmail = email });
-    }
+        => ConnectionWrapper.Connection.QuerySingleOrDefaultAsync<User?>(UserQueries.GetUserByEmail,
+            new { UserEmail = email },
+            ConnectionWrapper.Transaction);
 }

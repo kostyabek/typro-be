@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Typro.Presentation.Models.Request;
-using Typro.Presentation.Models.Response;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Typro.Application.Models.Auth;
+using Typro.Application.Services;
+using Typro.Presentation.Extensions;
+using Typro.Presentation.Models.Request.Auth;
 
 namespace Typro.Presentation.Controllers;
 
@@ -8,9 +12,63 @@ namespace Typro.Presentation.Controllers;
 [Route("auth")]
 public class AuthController : ControllerBase
 {
-    [HttpPost("sign-up")]
-    public async Task<ActionResult<UserSignUpResponseModel>> SignUpAsync(UserSignUpRequestModel request)
+    private readonly IAuthService _authService;
+
+    private readonly IValidator<UserSignUpRequest> _signUpRequestValidator;
+    private readonly IValidator<UserSignInRequest> _signInRequestValidator;
+
+    public AuthController(
+        IAuthService authService,
+        IValidator<UserSignUpRequest> signUpRequestValidator,
+        IValidator<UserSignInRequest> signInRequestValidator)
     {
-        throw new NotImplementedException();
+        _authService = authService;
+        _signUpRequestValidator = signUpRequestValidator;
+        _signInRequestValidator = signInRequestValidator;
+    }
+
+    [HttpPost("sign-up")]
+    public async Task<IActionResult> SignUpAsync(UserSignUpRequest request)
+    {
+        var validationResult = await _signUpRequestValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToActionResult();
+        }
+        
+        var dto = new UserSignUpDto(request.Email, request.Password);
+        var result = await _authService.SignUpAsync(dto);
+
+        return result.ToActionResult();
+    }
+
+    [HttpPost("sign-in")]
+    public async Task<IActionResult> SignInAsync(UserSignInRequest request)
+    {
+        var validationResult = await _signInRequestValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.ToActionResult();
+        }
+        
+        var dto = new UserSignInDto(request.Email, request.Password);
+        var result = await _authService.SignInAsync(dto);
+        return result.ToActionResult();
+    }
+    
+    [HttpPost("sign-out")]
+    [Authorize]
+    public Task<IActionResult> SignOutAsync()
+    {
+        var result = _authService.SignOut();
+        return Task.FromResult(result.ToActionResult());
+    }
+    
+    [HttpPost("refresh-token")]
+    [Authorize]
+    public async Task<IActionResult> RefreshAccessTokenAsync()
+    {
+        var result = await _authService.RefreshAccessTokenAsync();
+        return result.ToActionResult();
     }
 }
