@@ -1,4 +1,4 @@
-﻿namespace Typro.Domain.Enums;
+﻿namespace Typro.Domain.Enums.User;
 
 public enum UserRole
 {

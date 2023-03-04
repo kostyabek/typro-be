@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Typro.Application.Services;
-using Typro.Domain.Enums;
+using Typro.Domain.Enums.User;
 
 namespace Typro.Infrastructure.Services;
 

@@ -1,4 +1,4 @@
-﻿using Typro.Domain.Enums;
+﻿using Typro.Domain.Enums.User;
 
 namespace Typro.Application.Models.User;
 

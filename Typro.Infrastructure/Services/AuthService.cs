@@ -3,7 +3,7 @@ using Typro.Application.Models.Auth;
 using Typro.Application.Models.User;
 using Typro.Application.Services;
 using Typro.Application.UnitsOfWork;
-using Typro.Domain.Enums;
+using Typro.Domain.Enums.User;
 using Typro.Domain.Models.Result.Errors;
 
 namespace Typro.Infrastructure.Services;
