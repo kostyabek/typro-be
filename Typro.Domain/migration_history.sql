@@ -55,3 +55,66 @@ CREATE TABLE RefreshTokens
     CONSTRAINT UNIQ_UserId_Token UNIQUE (UserId, Token)
 )
 GO
+
+-- Add WordsModeTypes, TimeModeTypes and TrainingConfigurations tables
+IF NOT EXISTS(SELECT *
+              FROM sysobjects
+              WHERE name = 'WordsModeTypes'
+                and xtype = 'U')
+CREATE TABLE WordsModeTypes
+(
+    Id            int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
+    NumberOfWords int                             NOT NULL,
+    CONSTRAINT UNIQ_NumberOfWords UNIQUE (NumberOfWords)
+)
+GO
+
+INSERT INTO WordsModeTypes(NumberOfWords)
+VALUES (0);
+INSERT INTO WordsModeTypes(NumberOfWords)
+VALUES (10);
+INSERT INTO WordsModeTypes(NumberOfWords)
+VALUES (25);
+INSERT INTO WordsModeTypes(NumberOfWords)
+VALUES (50);
+INSERT INTO WordsModeTypes(NumberOfWords)
+VALUES (100);
+
+IF NOT EXISTS(SELECT *
+              FROM sysobjects
+              WHERE name = 'TimeModeTypes'
+                and xtype = 'U')
+CREATE TABLE TimeModeTypes
+(
+    Id              int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
+    NumberOfSeconds int                             NOT NULL,
+    CONSTRAINT UNIQ_NumberOfSeconds UNIQUE (NumberOfSeconds)
+)
+GO
+
+INSERT INTO TimeModeTypes(NumberOfSeconds)
+VALUES (0);
+INSERT INTO TimeModeTypes(NumberOfSeconds)
+VALUES (15);
+INSERT INTO TimeModeTypes(NumberOfSeconds)
+VALUES (30);
+INSERT INTO TimeModeTypes(NumberOfSeconds)
+VALUES (60);
+INSERT INTO TimeModeTypes(NumberOfSeconds)
+VALUES (120);
+
+IF NOT EXISTS(SELECT *
+              FROM sysobjects
+              WHERE name = 'TrainingConfigurations'
+                and xtype = 'U')
+CREATE TABLE TrainingConfigurations
+(
+    Id                   int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
+    IsPunctuationEnabled bit                             NOT NULL,
+    AreNumbersEnabled    bit                             NOT NULL,
+    WordsModeTypeId      int                             NOT NULL,
+    TimeModeTypeId       int                             NOT NULL,
+    CONSTRAINT FK_WordsModeTypes_WordsModeTypeId_Id FOREIGN KEY (WordsModeTypeId) REFERENCES WordsModeTypes (Id) ON DELETE NO ACTION,
+    CONSTRAINT FK_TimeModeTypes_TimeModeTypeId_Id FOREIGN KEY (TimeModeTypeId) REFERENCES TimeModeTypes (Id) ON DELETE NO ACTION
+)
+GO
