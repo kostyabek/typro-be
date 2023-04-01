@@ -6,12 +6,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Typro.Application.Models.Options;
-using Typro.Application.Services;
+using Typro.Application.Services.Auth;
+using Typro.Application.Services.Training;
+using Typro.Application.Services.User;
 using Typro.Application.UnitsOfWork;
-using Typro.Infrastructure.Services;
-using Typro.Infrastructure.UnitsOfWork;
+using Typro.Infrastructure;
+using Typro.Infrastructure.Services.Auth;
+using Typro.Infrastructure.Services.Training;
+using Typro.Infrastructure.Services.User;
 using Typro.Presentation.Models.Request.Auth;
+using Typro.Presentation.Models.Request.Training;
 using Typro.Presentation.Validators.Auth;
+using Typro.Presentation.Validators.Training;
 
 namespace Typro.Presentation.Extensions;
 
@@ -33,7 +39,8 @@ public static class ServiceCollectionExtensions
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = issuerSigningKey,
                     ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateAudience = false,
+                    ValidateLifetime = true
                 };
             });
 
@@ -62,6 +69,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICookieService, CookieService>();
         services.AddScoped<IUserIdentityService, UserIdentityService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ISupportedLanguagesService, SupportedLanguagesService>();
+        services.AddScoped<ITrainingConfigurationService, TrainingConfigurationService>();
+        services.AddScoped<ITextGenerationService, TextGenerationService>();
+        services.AddScoped<IWordsService, WordsService>();
+        services.AddScoped<ITrainingResultsService, TrainingResultsService>();
 
         return services;
     }
@@ -109,6 +122,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IValidator<UserSignUpRequest>, UserSignUpRequestValidator>();
         services.AddScoped<IValidator<UserSignInRequest>, UserSignInRequestValidator>();
+        services.AddScoped<IValidator<UpdateTrainingConfigurationRequest>, UpdateTrainingConfigurationRequestValidator>();
 
         return services;
     }

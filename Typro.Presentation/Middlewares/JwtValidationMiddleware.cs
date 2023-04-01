@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Typro.Application.Services;
+using Typro.Application.Services.User;
 using Typro.Application.UnitsOfWork;
 
 namespace Typro.Presentation.Middlewares;

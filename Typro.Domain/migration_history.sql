@@ -27,10 +27,16 @@ CREATE TABLE Roles
 GO
 
 -- Insert roles
-INSERT INTO Roles(Name)
-VALUES ('admin');
-INSERT INTO Roles(Name)
-VALUES ('user');
+IF NOT EXISTS(SELECT *
+              FROM dbo.Roles
+              WHERE Name IN ('admin', 'user'))
+    BEGIN
+        INSERT INTO Roles(Name)
+        VALUES ('admin');
+        INSERT INTO Roles(Name)
+        VALUES ('user');
+    END
+
 
 -- Add Role column to Users table
 ALTER TABLE Users
@@ -56,53 +62,33 @@ CREATE TABLE RefreshTokens
 )
 GO
 
--- Add WordsModeTypes, TimeModeTypes and TrainingConfigurations tables
+/*----- 04-03-2023 -----*/
+-- Add SupportedLanguages table
 IF NOT EXISTS(SELECT *
               FROM sysobjects
-              WHERE name = 'WordsModeTypes'
+              WHERE name = 'SupportedLanguages'
                 and xtype = 'U')
-CREATE TABLE WordsModeTypes
+CREATE TABLE SupportedLanguages
 (
-    Id            int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
-    NumberOfWords int                             NOT NULL,
-    CONSTRAINT UNIQ_NumberOfWords UNIQUE (NumberOfWords)
+    Id   int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
+    Name varchar(50)                     NOT NULL,
+    CONSTRAINT UNIQ_Name UNIQUE (Name)
 )
 GO
 
-INSERT INTO WordsModeTypes(NumberOfWords)
-VALUES (0);
-INSERT INTO WordsModeTypes(NumberOfWords)
-VALUES (10);
-INSERT INTO WordsModeTypes(NumberOfWords)
-VALUES (25);
-INSERT INTO WordsModeTypes(NumberOfWords)
-VALUES (50);
-INSERT INTO WordsModeTypes(NumberOfWords)
-VALUES (100);
-
+-- Populate languages
 IF NOT EXISTS(SELECT *
-              FROM sysobjects
-              WHERE name = 'TimeModeTypes'
-                and xtype = 'U')
-CREATE TABLE TimeModeTypes
-(
-    Id              int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
-    NumberOfSeconds int                             NOT NULL,
-    CONSTRAINT UNIQ_NumberOfSeconds UNIQUE (NumberOfSeconds)
-)
-GO
+              FROM dbo.SupportedLanguages
+              WHERE Name IN ('English'))
+    INSERT INTO SupportedLanguages(Name)
+    VALUES ('English');
+IF NOT EXISTS(SELECT *
+              FROM dbo.SupportedLanguages
+              WHERE Name IN ('Ukrainian'))
+    INSERT INTO SupportedLanguages(Name)
+    VALUES ('Ukrainian');
 
-INSERT INTO TimeModeTypes(NumberOfSeconds)
-VALUES (0);
-INSERT INTO TimeModeTypes(NumberOfSeconds)
-VALUES (15);
-INSERT INTO TimeModeTypes(NumberOfSeconds)
-VALUES (30);
-INSERT INTO TimeModeTypes(NumberOfSeconds)
-VALUES (60);
-INSERT INTO TimeModeTypes(NumberOfSeconds)
-VALUES (120);
-
+-- Add TrainingConfigurations table
 IF NOT EXISTS(SELECT *
               FROM sysobjects
               WHERE name = 'TrainingConfigurations'
@@ -110,11 +96,58 @@ IF NOT EXISTS(SELECT *
 CREATE TABLE TrainingConfigurations
 (
     Id                   int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
-    IsPunctuationEnabled bit                             NOT NULL,
-    AreNumbersEnabled    bit                             NOT NULL,
-    WordsModeTypeId      int                             NOT NULL,
-    TimeModeTypeId       int                             NOT NULL,
-    CONSTRAINT FK_WordsModeTypes_WordsModeTypeId_Id FOREIGN KEY (WordsModeTypeId) REFERENCES WordsModeTypes (Id) ON DELETE NO ACTION,
-    CONSTRAINT FK_TimeModeTypes_TimeModeTypeId_Id FOREIGN KEY (TimeModeTypeId) REFERENCES TimeModeTypes (Id) ON DELETE NO ACTION
+    IsPunctuationEnabled bit                             NOT NULL DEFAULT 0,
+    AreNumbersEnabled    bit                             NOT NULL DEFAULT 0,
+    WordsModeType        int                             NOT NULL DEFAULT 25 CHECK (WordsModeType IN (0, 10, 25, 50, 100)),
+    TimeModeType         int                             NOT NULL DEFAULT 0 CHECK (TimeModeType IN (0, 15, 30, 60, 120)),
+    LanguageId           int                             NOT NULL DEFAULT 1,
+    CONSTRAINT FK_TrainingConfigurations_LanguageId_Id FOREIGN KEY (LanguageId) REFERENCES SupportedLanguages (Id) ON DELETE NO ACTION,
+)
+GO
+
+-- Add training configuration FK to Users
+ALTER TABLE Users
+    ADD TrainingConfigurationId int NOT NULL
+        CONSTRAINT FK_TrainingConfigurations_TrainingConfigurationId_Id FOREIGN KEY (TrainingConfigurationId) REFERENCES TrainingConfigurations (Id) ON DELETE NO ACTION
+GO
+
+/*----- 14-03-2023 -----*/
+-- Add Words table
+IF NOT EXISTS(SELECT *
+              FROM sysobjects
+              WHERE name = 'Words'
+                and xtype = 'U')
+CREATE TABLE Words
+(
+    Id         int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
+    Name       nvarchar(255)                   NOT NULL,
+    LanguageId int                             NOT NULL
+        CONSTRAINT FK_Words_LanguageId_Id FOREIGN KEY (LanguageId) REFERENCES SupportedLanguages (Id) ON DELETE NO ACTION,
+)
+GO
+
+/*----- 28-03-2023 -----*/
+-- Add TrainingResults table
+IF NOT EXISTS(SELECT *
+              FROM sysobjects
+              WHERE name = 'TrainingResults'
+                and xtype = 'U')
+CREATE TABLE TrainingResults
+(
+    Id                 int IDENTITY (1, 1) PRIMARY KEY NOT NULL,
+    UserId             int                             NOT NULL,
+    WordsPerMinute     float                           NOT NULL,
+    Accuracy           float                           NOT NULL,
+    TimeInMilliseconds int                             NOT NULL,
+    WordsModeType      int                             NOT NULL DEFAULT 25 CHECK (WordsModeType IN (0, 10, 25, 50, 100)),
+    TimeModeType       int                             NOT NULL DEFAULT 0 CHECK (TimeModeType IN (0, 15, 30, 60, 120)),
+    DateConducted      datetime2                       NOT NULL,
+    LanguageId         int                             NOT NULL,
+    CorrectLetters     int                             NOT NULL,
+    IncorrectLetters   int                             NOT NULL,
+    ExtraLetters       int                             NOT NULL,
+    InitialLetters     int                             NOT NULL
+        CONSTRAINT FK_Users_UserId_Id FOREIGN KEY (UserId) REFERENCES Users (Id) ON DELETE CASCADE,
+        CONSTRAINT FK_SupportedLanguages_LanguageId_Id FOREIGN KEY (LanguageId) REFERENCES SupportedLanguages (Id) ON DELETE NO ACTION,
 )
 GO

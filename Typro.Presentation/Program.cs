@@ -24,6 +24,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors(e =>
+{
+    e.WithOrigins("https://typro.local:5286")
+        .AllowCredentials()
+        .AllowAnyHeader();
+});
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

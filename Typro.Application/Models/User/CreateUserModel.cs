@@ -2,4 +2,4 @@
 
 namespace Typro.Application.Models.User;
 
-public record CreateUserDto(string Email, string PasswordHash, UserRole RoleId);
+public record CreateUserDto(string Email, string PasswordHash, UserRole RoleId, int TrainingConfigurationId);
