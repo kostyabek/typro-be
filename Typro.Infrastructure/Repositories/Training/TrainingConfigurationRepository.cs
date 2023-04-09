@@ -13,7 +13,7 @@ public class TrainingConfigurationRepository : DatabaseConnectable, ITrainingCon
     }
 
     public Task<int> CreateDefaultTrainingConfigurationAsync()
-        => ConnectionWrapper.Connection.ExecuteAsync(TrainingConfigurationQueries.InsertDefaultTrainingConfiguration,
+        => ConnectionWrapper.Connection.ExecuteScalarAsync<int>(TrainingConfigurationQueries.InsertDefaultTrainingConfiguration,
             transaction: ConnectionWrapper.Transaction);
 
     public Task<TrainingConfiguration?> GetTrainingConfigurationByIdAsync(int id)

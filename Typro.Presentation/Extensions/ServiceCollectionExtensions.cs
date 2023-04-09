@@ -5,12 +5,14 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Typro.Application.Helpers;
 using Typro.Application.Models.Options;
 using Typro.Application.Services.Auth;
 using Typro.Application.Services.Training;
 using Typro.Application.Services.User;
 using Typro.Application.UnitsOfWork;
 using Typro.Infrastructure;
+using Typro.Infrastructure.Helpers;
 using Typro.Infrastructure.Services.Auth;
 using Typro.Infrastructure.Services.Training;
 using Typro.Infrastructure.Services.User;
@@ -75,6 +77,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITextGenerationService, TextGenerationService>();
         services.AddScoped<IWordsService, WordsService>();
         services.AddScoped<ITrainingResultsService, TrainingResultsService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddHelpers(this IServiceCollection services)
+    {
+        services.AddScoped<INicknameHelper, NicknameHelper>();
 
         return services;
     }

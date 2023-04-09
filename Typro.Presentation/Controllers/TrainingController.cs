@@ -1,10 +1,13 @@
-﻿using System.Diagnostics;
+﻿using FluentResults;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Typro.Application.Models.Training;
 using Typro.Application.Services.Training;
 using Typro.Application.Services.User;
+using Typro.Domain.Database.Models;
+using Typro.Domain.Models.Training;
 using Typro.Presentation.Extensions;
 using Typro.Presentation.Models.Request.Training;
 
@@ -15,7 +18,7 @@ namespace Typro.Presentation.Controllers;
 public class TrainingController : ControllerBase
 {
     private readonly IValidator<UpdateTrainingConfigurationRequest> _updateTrainingConfigurationRequestValidator;
-    
+
     private readonly ISupportedLanguagesService _supportedLanguagesService;
     private readonly ITrainingConfigurationService _trainingConfigurationService;
     private readonly ITextGenerationService _textGenerationService;
@@ -41,15 +44,16 @@ public class TrainingController : ControllerBase
     [HttpGet("supported-languages")]
     public async Task<IActionResult> GetSupportedLanguagesAsync()
     {
-        var result = await _supportedLanguagesService.GetSupportedLanguagesAsync();
+        Result<IEnumerable<SupportedLanguage>> result = await _supportedLanguagesService.GetSupportedLanguagesAsync();
         return result.ToActionResult();
     }
-    
+
     [HttpGet("configurations/{configurationId:int}")]
     [Authorize]
     public async Task<IActionResult> GetTrainingConfigurationByIdAsync([FromRoute] int configurationId)
     {
-        var result = await _trainingConfigurationService.GetTrainingConfigurationByIdAsync(configurationId);
+        Result<TrainingConfiguration> result =
+            await _trainingConfigurationService.GetTrainingConfigurationByIdAsync(configurationId);
         return result.ToActionResult();
     }
 
@@ -58,23 +62,23 @@ public class TrainingController : ControllerBase
     public async Task<IActionResult> UpdateTrainingConfigurationAsync(
         [FromBody] UpdateTrainingConfigurationRequest request)
     {
-        var validationResult = await _updateTrainingConfigurationRequestValidator.ValidateAsync(request);
+        ValidationResult validationResult = await _updateTrainingConfigurationRequestValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
             return validationResult.ToActionResult();
         }
-        
+
         var dto = new TrainingConfigurationDto(
             request.IsPunctuationEnabled,
             request.AreNumbersEnabled,
             request.WordsModeType,
             request.TimeModeType,
             request.LanguageId);
-        
-        var result = await _trainingConfigurationService.UpdateTrainingConfigurationAsync(dto);
+
+        Result result = await _trainingConfigurationService.UpdateTrainingConfigurationAsync(dto);
         return result.ToActionResult();
     }
-    
+
     [HttpGet("text-generation")]
     public async Task<IActionResult> GetGeneratedTextAsync([FromQuery] GetGeneratedTextRequest request)
     {
@@ -84,35 +88,45 @@ public class TrainingController : ControllerBase
             request.WordsMode,
             request.TimeMode,
             request.LanguageId);
-        
-        var result = await _textGenerationService.GenerateText(dto);
+
+        Result<IEnumerable<IEnumerable<char>>> result = await _textGenerationService.GenerateText(dto);
         return result.ToActionResult();
     }
-    
+
     [HttpPost("results")]
     [Authorize]
-    public async Task<IActionResult> SaveTrainingResultsAsync(
-        [FromBody] SetTrainingResultsRequest request)
+    public async Task<IActionResult> CreateTrainingResultsAsync(
+        [FromBody] CreateTrainingResultsRequest request)
     {
-        // var validationResult = await _updateTrainingConfigurationRequestValidator.ValidateAsync(request);
-        // if (!validationResult.IsValid)
-        // {
-        //     return validationResult.ToActionResult();
-        // }
-
-        var userId = _userIdentityService.UserId;
-        var dto = new TrainingResultsDto(
-            request.WordsPerMinute,
-            request.Accuracy,
-            request.TimeInMilliseconds,
-            request.CharactersStats,
+        int userId = _userIdentityService.UserId;
+        var dto = new FullTrainingResultsDto(
+            -1.0f,
+            -1.0f,
+            -1,
+            new CharacterStats(-1, -1, -1, -1),
             request.LanguageId,
             request.TimeModeType,
             request.WordsModeType,
             request.DateConducted,
             userId);
 
-        var result = await _trainingResultsService.SaveTrainingResultsAsync(dto);
+        Result<int> result = await _trainingResultsService.CreateTrainingResultsAsync(dto);
+        return result.ToActionResult();
+    }
+
+    [HttpPatch("results/{id:int}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateTrainingResultsAsync(
+        [FromBody] UpdateTrainingResultsRequest request, int id)
+    {
+        var dto = new UpdateTrainingResultsDto(
+            id,
+            request.WordsPerMinute,
+            request.Accuracy,
+            request.TimeInMilliseconds,
+            request.CharactersStats);
+
+        Result<int> result = await _trainingResultsService.UpdateTrainingResultsAsync(dto);
         return result.ToActionResult();
     }
 }

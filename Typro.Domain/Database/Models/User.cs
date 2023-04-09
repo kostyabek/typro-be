@@ -9,4 +9,6 @@ public class User : BaseIdEntity
     public UserRole RoleId { get; set; }
     public int TrainingConfigurationId { get; set; }
     public TrainingConfiguration TrainingConfiguration { get; set; }
+    public string Nickname { get; set; }
+    public DateTime CreatedDate { get; set; }
 }

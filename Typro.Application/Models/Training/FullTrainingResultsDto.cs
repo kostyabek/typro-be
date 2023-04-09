@@ -3,7 +3,7 @@ using Typro.Domain.Models.Training;
 
 namespace Typro.Application.Models.Training;
 
-public record TrainingResultsDto(
+public record FullTrainingResultsDto(
     float WordsPerMinute,
     float Accuracy,
     int TimeInMilliseconds,

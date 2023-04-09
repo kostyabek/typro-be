@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using Typro.Application.Helpers;
 using Typro.Application.Models.Auth;
 using Typro.Application.Models.User;
 using Typro.Application.Services.Auth;
@@ -18,6 +19,7 @@ public class AuthService : IAuthService
     private readonly ICookieService _cookieService;
     private readonly IUserIdentityService _userIdentityService;
     private readonly IUserService _userService;
+    private readonly INicknameHelper _nicknameHelper;
 
     public AuthService(
         ITrainingConfigurationService trainingConfigurationService,
@@ -25,7 +27,8 @@ public class AuthService : IAuthService
         ICookieService cookieService,
         IUserIdentityService userIdentityService,
         IUserService userService,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        INicknameHelper nicknameHelper)
     {
         _trainingConfigurationService = trainingConfigurationService;
         _tokenService = tokenService;
@@ -33,6 +36,7 @@ public class AuthService : IAuthService
         _userIdentityService = userIdentityService;
         _userService = userService;
         _unitOfWork = unitOfWork;
+        _nicknameHelper = nicknameHelper;
     }
 
     public async Task<Result<UserAuthResponseDto>> SignUpAsync(UserSignUpDto dto)
@@ -51,8 +55,11 @@ public class AuthService : IAuthService
             var trainingConfigurationCreationResult =
                 await _trainingConfigurationService.CreateDefaultTrainingConfigurationAsync();
 
+            var createdDate = DateTime.UtcNow;
+            var nickname = _nicknameHelper.GenerateNicknameFromDate(createdDate);
             var createUserModel =
-                new CreateUserDto(dto.Email, passwordHash, UserRole.User, trainingConfigurationCreationResult.Value);
+                new CreateUserDto(dto.Email, passwordHash, UserRole.User, trainingConfigurationCreationResult.Value,
+                    nickname, createdDate);
 
             var userCreationResult = await _userService.CreateUserAsync(createUserModel);
 

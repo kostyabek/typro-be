@@ -148,6 +148,54 @@ CREATE TABLE TrainingResults
     ExtraLetters       int                             NOT NULL,
     InitialLetters     int                             NOT NULL
         CONSTRAINT FK_Users_UserId_Id FOREIGN KEY (UserId) REFERENCES Users (Id) ON DELETE CASCADE,
-        CONSTRAINT FK_SupportedLanguages_LanguageId_Id FOREIGN KEY (LanguageId) REFERENCES SupportedLanguages (Id) ON DELETE NO ACTION,
+    CONSTRAINT FK_SupportedLanguages_LanguageId_Id FOREIGN KEY (LanguageId) REFERENCES SupportedLanguages (Id) ON DELETE NO ACTION,
 )
+GO
+
+/*----- 08-04-2023 -----*/
+-- Add user data to Users table
+ALTER TABLE Users
+    ADD
+        CreatedDate datetime2 NOT NULL,
+        Nickname nvarchar(20) NOT NULL
+GO
+
+/*----- 09-04-2023 -----*/
+-- Add stored procedures for profile data
+CREATE PROCEDURE dbo.ProfileHighLevelInfo @UserId int
+AS
+SELECT u1.Nickname             as Nickname,
+       u1.CreatedDate          as MemberSince,
+       (SELECT count(*)
+        FROM dbo.TrainingResults tr
+                 join dbo.Users u2 ON tr.UserId = u2.Id
+        WHERE u2.Id = @UserId) as TestsStarted,
+       (SELECT count(*)
+        FROM dbo.TrainingResults tr
+                 join dbo.Users u3 ON tr.UserId = u3.Id
+        WHERE tr.WordsPerMinute <> -1
+          AND u3.Id = @UserId) as TestsCompleted
+FROM dbo.Users u1
+WHERE u1.Id = @UserId;
+GO
+
+CREATE PROCEDURE dbo.BestResults @UserId int
+AS
+SELECT temp.WordsModeType,
+       temp.TimeModeType,
+       temp.WordsPerMinute,
+       temp.Accuracy,
+       temp.DateConducted
+FROM (SELECT ROW_NUMBER() OVER (PARTITION BY tr.WordsModeType, tr.TimeModeType ORDER BY tr.WordsPerMinute desc) AS RowNumber,
+             tr.WordsModeType,
+             tr.TimeModeType,
+             tr.WordsPerMinute,
+             tr.Accuracy,
+             tr.DateConducted,
+             tr.UserId
+      FROM dbo.TrainingResults tr
+               join dbo.Users u ON tr.UserId = u.Id
+      WHERE tr.WordsPerMinute <> -1) as temp
+WHERE temp.RowNumber = 1
+  AND temp.UserId = @UserId
 GO

@@ -3,9 +3,9 @@
 public static class UserQueries
 {
     public const string InsertUser = @"
-INSERT INTO dbo.Users(Email, PasswordHash, RoleId, TrainingConfigurationId)
+INSERT INTO dbo.Users(Email, PasswordHash, RoleId, TrainingConfigurationId, CreatedDate, Nickname)
 OUTPUT INSERTED.Id
-VALUES (@Email, @PasswordHash, @RoleId, @TrainingConfigurationId);";
+VALUES (@Email, @PasswordHash, @RoleId, @TrainingConfigurationId, @CreatedDate, @Nickname);";
 
     public const string GetUserById = @"
 SELECT
@@ -13,7 +13,9 @@ SELECT
     Email,
     PasswordHash,
     RoleId,
-    TrainingConfigurationId
+    TrainingConfigurationId,
+    CreatedDate,
+    Nickname
 FROM dbo.Users
 WHERE Id = @UserId;";
 
@@ -23,7 +25,9 @@ SELECT
     Email,
     PasswordHash,
     RoleId,
-    TrainingConfigurationId
+    TrainingConfigurationId,
+    CreatedDate,
+    Nickname
 FROM dbo.Users 
 WHERE Email = @UserEmail;";
 }

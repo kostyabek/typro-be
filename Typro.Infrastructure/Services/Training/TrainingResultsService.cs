@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using Typro.Application.Models.Training;
+using Typro.Application.Models.User;
 using Typro.Application.Services.Training;
 using Typro.Application.UnitsOfWork;
 
@@ -13,12 +14,36 @@ public class TrainingResultsService : ITrainingResultsService
     {
         _unitOfWork = unitOfWork;
     }
-    
-    public async Task<Result<int>> SaveTrainingResultsAsync(TrainingResultsDto dto)
+
+    public async Task<Result<int>> CreateTrainingResultsAsync(FullTrainingResultsDto dto)
     {
-        var generatedTrainingConfigurationId =
+        int generatedTrainingConfigurationId =
             await _unitOfWork.TrainingResultsRepository.CreateTrainingResultsAsync(dto);
 
         return Result.Ok(generatedTrainingConfigurationId);
+    }
+
+    public async Task<Result<int>> UpdateTrainingResultsAsync(UpdateTrainingResultsDto dto)
+    {
+        int generatedTrainingConfigurationId =
+            await _unitOfWork.TrainingResultsRepository.UpdateTrainingResultsAsync(dto);
+
+        return Result.Ok(generatedTrainingConfigurationId);
+    }
+
+    public async Task<Result<HighLevelProfileInfoDto>> GetHighLevelProfileInfoAsync(int userId)
+    {
+        HighLevelProfileInfoDto highLevelProfileInfo =
+            await _unitOfWork.TrainingResultsRepository.GetTrainingCountAsync(userId);
+
+        return Result.Ok(highLevelProfileInfo);
+    }
+
+    public async Task<Result<IEnumerable<HighLevelTrainingResultDto>>> GetHighLevelTrainingResultsAsync(int userId)
+    {
+        IEnumerable<HighLevelTrainingResultDto> highLevelTrainingResults =
+            await _unitOfWork.TrainingResultsRepository.GetBestResultsAsync(userId);
+
+        return Result.Ok(highLevelTrainingResults);
     }
 }
