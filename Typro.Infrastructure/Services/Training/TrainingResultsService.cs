@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using Typro.Application.Models.Leaderboard;
 using Typro.Application.Models.Training;
 using Typro.Application.Models.User;
 using Typro.Application.Services.Training;
@@ -45,5 +46,13 @@ public class TrainingResultsService : ITrainingResultsService
             await _unitOfWork.TrainingResultsRepository.GetBestResultsAsync(userId);
 
         return Result.Ok(highLevelTrainingResults);
+    }
+    
+    public async Task<Result<IEnumerable<LeaderboardEntryDto>>> GetLeaderboardAsync(LeaderboardFilterDto dto)
+    {
+        IEnumerable<LeaderboardEntryDto> leaderboardEntries =
+            await _unitOfWork.TrainingResultsRepository.GetLeaderboardAsync(dto);
+
+        return Result.Ok(leaderboardEntries);
     }
 }
