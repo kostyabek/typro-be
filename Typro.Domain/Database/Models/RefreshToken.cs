@@ -1,6 +1,6 @@
 ﻿namespace Typro.Domain.Database.Models;
 
-public class RefreshToken : BaseEntity
+public class RefreshToken : BaseIdEntity
 {
     public string Token { get; set; }
     public int UserId { get; set; }

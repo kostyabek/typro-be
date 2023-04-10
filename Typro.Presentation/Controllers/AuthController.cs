@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Typro.Application.Models.Auth;
-using Typro.Application.Services;
+using Typro.Application.Services.Auth;
 using Typro.Presentation.Extensions;
 using Typro.Presentation.Models.Request.Auth;
 
@@ -65,7 +65,6 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("refresh-token")]
-    [Authorize]
     public async Task<IActionResult> RefreshAccessTokenAsync()
     {
         var result = await _authService.RefreshAccessTokenAsync();

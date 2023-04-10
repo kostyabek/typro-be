@@ -1,7 +1,7 @@
 using Typro.Presentation.Extensions;
 using Typro.Presentation.Middlewares;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
@@ -13,16 +13,25 @@ builder.Services
     .AddUnitOfWork()
     .AddOptions(builder.Configuration)
     .AddServices()
+    .AddHelpers()
     .AddHttpContextAccessor()
     .AddFluentValidators();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(e =>
+{
+    e.WithOrigins("https://typro.local:5286")
+        .AllowCredentials()
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+});
 
 app.UseHttpsRedirection();
 

@@ -9,16 +9,19 @@ public partial class UserSignUpRequestValidator : AbstractValidator<UserSignUpRe
     public UserSignUpRequestValidator()
     {
         RuleFor(e => e.Email)
-            .Matches(EmailRegex());
+            .Matches(EmailRegex())
+            .WithMessage("Invalid e-mail format");
         RuleFor(e => e.Password)
-            .Matches(PasswordRegex());
+            .Matches(PasswordRegex())
+            .WithMessage("Password must consist of 8 or more characters and include 1 special character, 1 number, 1 upper and lowercase letters");
         RuleFor(e => e.ConfirmPassword)
-            .Equal(e => e.Password);
+            .Equal(e => e.Password)
+            .WithMessage("Passwords do not match");
     }
 
     [GeneratedRegex("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")]
     private static partial Regex EmailRegex();
 
-    [GeneratedRegex("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$")]
+    [GeneratedRegex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")]
     private static partial Regex PasswordRegex();
 }

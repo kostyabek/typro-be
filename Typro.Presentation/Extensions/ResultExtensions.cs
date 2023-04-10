@@ -4,32 +4,41 @@ using Typro.Domain.Models.Result.Errors;
 
 namespace Typro.Presentation.Extensions;
 
+public class UniversalResponse<T>
+{
+    public T? Value { get; set; }
+    public IEnumerable<IReason> Reasons { get; set; }
+};
+
+public static class UniversalResponse
+{
+    public static UniversalResponse<object> FromMessages(IEnumerable<IReason> reasons) =>
+        new() { Reasons = reasons };
+}
+
 public static class ResultExtensions
 {
     public static IActionResult ToActionResult(this Result result)
     {
-        return TryGetErrorActionResult(result, out var actionResult) ?
-            actionResult :
-            new OkObjectResult(new
-            {
-                messages = result.Reasons ?? new List<IReason>()
-            });
+        return TryGetErrorActionResult(result, out var actionResult)
+            ? actionResult
+            : new OkObjectResult(UniversalResponse.FromMessages(result.Reasons));
     }
 
     public static IActionResult ToActionResult<T>(this Result<T> result)
     {
         var nonGenericResult = result.ToResult();
 
-        return TryGetErrorActionResult(nonGenericResult, out var actionResult) ?
-            actionResult :
-            new OkObjectResult(new
+        return TryGetErrorActionResult(nonGenericResult, out var actionResult)
+            ? actionResult
+            : new OkObjectResult(new UniversalResponse<T>
             {
-                value = result.ValueOrDefault,
-                messages = result.Reasons ?? new List<IReason>()
+                Value = result.ValueOrDefault,
+                Reasons = result.Reasons
             });
     }
 
-    private static bool TryGetErrorActionResult(Result result, out IActionResult actionResult)
+    private static bool TryGetErrorActionResult(ResultBase result, out IActionResult actionResult)
     {
         actionResult = default;
 
@@ -42,23 +51,30 @@ public static class ResultExtensions
 
         if (result.HasError<NotFoundError>())
         {
-            actionResult = new NotFoundObjectResult(reasons);
+            actionResult = new NotFoundObjectResult(UniversalResponse.FromMessages(result.Reasons));
             return true;
         }
 
         if (result.HasError<InvalidOperationError>())
         {
-            actionResult = new BadRequestObjectResult(reasons);
+            actionResult = new BadRequestObjectResult(UniversalResponse.FromMessages(result.Reasons));
             return true;
         }
 
         if (result.HasError<UnauthorizedError>())
         {
-            actionResult = new UnauthorizedObjectResult(reasons);
+            actionResult = new UnauthorizedObjectResult(UniversalResponse.FromMessages(result.Reasons));
             return true;
         }
 
-        actionResult = new ObjectResult(reasons) { StatusCode = StatusCodes.Status500InternalServerError };
+        if (result.HasError<ValidationError>())
+        {
+            actionResult = new BadRequestObjectResult(UniversalResponse.FromMessages(result.Reasons));
+            return true;
+        }
+
+        actionResult = new ObjectResult(UniversalResponse.FromMessages(result.Reasons))
+            { StatusCode = StatusCodes.Status500InternalServerError };
 
         return true;
     }
