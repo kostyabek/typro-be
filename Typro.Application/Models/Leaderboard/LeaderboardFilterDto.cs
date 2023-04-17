@@ -7,4 +7,6 @@ public record LeaderboardFilterDto(
     WordsModeType WordsModeType,
     int LanguageId,
     DateTime FromDate,
-    DateTime ToDate);
+    DateTime ToDate,
+    int PageNumber,
+    int PageSize);

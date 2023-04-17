@@ -44,7 +44,8 @@ public class TrainingController : ControllerBase
     [HttpGet("supported-languages")]
     public async Task<IActionResult> GetSupportedLanguagesAsync()
     {
-        Result<IEnumerable<SupportedLanguage>> result = await _supportedLanguagesService.GetSupportedLanguagesAsync();
+        Result<IEnumerable<SupportedLanguageDto>>
+            result = await _supportedLanguagesService.GetSupportedLanguagesAsync();
         return result.ToActionResult();
     }
 

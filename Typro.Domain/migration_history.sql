@@ -206,7 +206,9 @@ CREATE PROCEDURE dbo.Leaderboard @TimeModeType int,
                                  @WordsModeType int,
                                  @LanguageId int,
                                  @FromDate datetime2,
-                                 @ToDate datetime2
+                                 @ToDate datetime2,
+                                 @PageNumber int,
+                                 @PageSize int
 AS
 SELECT ROW_NUMBER() OVER (ORDER BY temp.WordsPerMinute DESC) AS Place,
        temp.Nickname,
@@ -227,4 +229,6 @@ FROM (SELECT ROW_NUMBER() OVER (PARTITION BY u.Nickname ORDER BY tr.WordsPerMinu
         AND tr.DateConducted < DATEADD(DAY, 1, @ToDate)
         AND tr.WordsPerMinute > 0) temp
 WHERE temp.LocalPlace = 1
+ORDER BY Place
+OFFSET (@PageNumber - 1) * @PageSize ROWS FETCH NEXT @PageSize ROWS ONLY
 GO

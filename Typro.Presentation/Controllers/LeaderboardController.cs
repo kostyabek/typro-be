@@ -26,7 +26,9 @@ public class LeaderboardController : ControllerBase
             request.WordsModeType,
             request.LanguageId,
             request.FromDate,
-            request.ToDate);
+            request.ToDate,
+            request.PageNumber,
+            request.PageSize);
 
         Result<IEnumerable<LeaderboardEntryDto>> result =
             await _trainingResultsService.GetLeaderboardAsync(filterDto);
