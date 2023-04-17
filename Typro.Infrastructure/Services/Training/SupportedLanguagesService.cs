@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using Typro.Application.Models.Training;
 using Typro.Application.Services.Training;
 using Typro.Application.UnitsOfWork;
 using Typro.Domain.Database.Models;
@@ -14,11 +15,15 @@ public class SupportedLanguagesService : ISupportedLanguagesService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Result<IEnumerable<SupportedLanguage>>> GetSupportedLanguagesAsync()
+    public async Task<Result<IEnumerable<SupportedLanguageDto>>> GetSupportedLanguagesAsync()
     {
-        var supportedLanguages =
+        IEnumerable<SupportedLanguage> supportedLanguages =
             await _unitOfWork.SupportedLanguagesRepository.GetSupportedLanguagesAsync();
 
-        return Result.Ok(supportedLanguages);
+        IEnumerable<SupportedLanguageDto> dtos = supportedLanguages.Select(e =>
+            new SupportedLanguageDto(e.Id, e.Name,
+                e.Name.Equals("english", StringComparison.InvariantCultureIgnoreCase)));
+
+        return Result.Ok(dtos);
     }
 }

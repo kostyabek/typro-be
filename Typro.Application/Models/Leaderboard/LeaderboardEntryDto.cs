@@ -1,7 +1,7 @@
 ﻿namespace Typro.Application.Models.Leaderboard;
 
 public record LeaderboardEntryDto(
-    int Place,
+    long Place,
     string Nickname,
     double WordsPerMinute,
     double Accuracy,
