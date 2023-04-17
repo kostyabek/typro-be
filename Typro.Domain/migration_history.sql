@@ -199,3 +199,32 @@ FROM (SELECT ROW_NUMBER() OVER (PARTITION BY tr.WordsModeType, tr.TimeModeType O
 WHERE temp.RowNumber = 1
   AND temp.UserId = @UserId
 GO
+
+/*----- 10-04-2023 -----*/
+-- Add stored procedure for leaderboards
+CREATE PROCEDURE dbo.Leaderboard @TimeModeType int,
+                                 @WordsModeType int,
+                                 @LanguageId int,
+                                 @FromDate datetime2,
+                                 @ToDate datetime2
+AS
+SELECT ROW_NUMBER() OVER (ORDER BY temp.WordsPerMinute DESC) AS Place,
+       temp.Nickname,
+       temp.WordsPerMinute,
+       temp.Accuracy,
+       temp.DateConducted
+FROM (SELECT ROW_NUMBER() OVER (PARTITION BY u.Nickname ORDER BY tr.WordsPerMinute DESC) AS LocalPlace,
+             u.Nickname                                                                  AS Nickname,
+             tr.WordsPerMinute                                                           AS WordsPerMinute,
+             tr.Accuracy                                                                 AS Accuracy,
+             tr.DateConducted                                                            AS DateConducted
+      FROM dbo.TrainingResults tr
+               JOIN dbo.Users u ON tr.UserId = u.Id
+      WHERE tr.TimeModeType = @TimeModeType
+        AND tr.WordsModeType = @WordsModeType
+        AND tr.LanguageId = @LanguageId
+        AND tr.DateConducted >= @FromDate
+        AND tr.DateConducted < DATEADD(DAY, 1, @ToDate)
+        AND tr.WordsPerMinute > 0) temp
+WHERE temp.LocalPlace = 1
+GO

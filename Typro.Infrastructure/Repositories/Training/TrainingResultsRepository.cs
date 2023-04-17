@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Dapper;
 using Typro.Application.Models.Database;
+using Typro.Application.Models.Leaderboard;
 using Typro.Application.Models.Training;
 using Typro.Application.Models.User;
 using Typro.Application.Queries;
@@ -60,5 +61,12 @@ public class TrainingResultsRepository : DatabaseConnectable, ITrainingResultsRe
             "dbo.BestResults",
             commandType: CommandType.StoredProcedure,
             param: new { UserId = userId },
+            transaction: ConnectionWrapper.Transaction);
+    
+    public Task<IEnumerable<LeaderboardEntryDto>> GetLeaderboardAsync(LeaderboardFilterDto dto)
+        => ConnectionWrapper.Connection.QueryAsync<LeaderboardEntryDto>(
+            "dbo.Leaderboard",
+            commandType: CommandType.StoredProcedure,
+            param: dto,
             transaction: ConnectionWrapper.Transaction);
 }
