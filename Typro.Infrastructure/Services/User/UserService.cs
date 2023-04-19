@@ -17,13 +17,13 @@ public class UserService : IUserService
 
     public async Task<Result<int>> CreateUserAsync(CreateUserDto model)
     {
-        var generatedUserId = await _unitOfWork.UserRepository.CreateUserAsync(model);
+        int generatedUserId = await _unitOfWork.UserRepository.CreateUserAsync(model);
         return Result.Ok(generatedUserId);
     }
 
     public async Task<Result<Domain.Database.Models.User>> GetUserByEmailAsync(string email)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+        Domain.Database.Models.User? user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
         return user is null ?
             Result.Fail(new NotFoundError("User not found")) :
             Result.Ok(user);
@@ -31,7 +31,7 @@ public class UserService : IUserService
     
     public async Task<Result<Domain.Database.Models.User>> GetUserByIdAsync(int id)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(id);
+        Domain.Database.Models.User? user = await _unitOfWork.UserRepository.GetUserByIdAsync(id);
         return user is null ?
             Result.Fail(new NotFoundError("User not found")) :
             Result.Ok(user);

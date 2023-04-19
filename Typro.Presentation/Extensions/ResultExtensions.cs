@@ -20,7 +20,7 @@ public static class ResultExtensions
 {
     public static IActionResult ToActionResult(this Result result)
     {
-        return TryGetErrorActionResult(result, out var actionResult)
+        return TryGetErrorActionResult(result, out IActionResult? actionResult)
             ? actionResult
             : new OkObjectResult(UniversalResponse.FromMessages(result.Reasons));
     }
@@ -29,7 +29,7 @@ public static class ResultExtensions
     {
         var nonGenericResult = result.ToResult();
 
-        return TryGetErrorActionResult(nonGenericResult, out var actionResult)
+        return TryGetErrorActionResult(nonGenericResult, out IActionResult? actionResult)
             ? actionResult
             : new OkObjectResult(new UniversalResponse<T>
             {
@@ -47,7 +47,7 @@ public static class ResultExtensions
             return false;
         }
 
-        var reasons = result.Reasons;
+        List<IReason>? reasons = result.Reasons;
 
         if (result.HasError<NotFoundError>())
         {

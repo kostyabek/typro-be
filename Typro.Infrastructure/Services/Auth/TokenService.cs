@@ -29,7 +29,7 @@ public class TokenService : ITokenService
 
     public string GenerateAccessToken(Domain.Database.Models.User user)
     {
-        var roleClaimValue = Enum.GetName(user.RoleId).ToLower();
+        string? roleClaimValue = Enum.GetName(user.RoleId).ToLower();
         var claims = new List<Claim>
         {
             new("id", user.Id.ToString()),
@@ -39,20 +39,20 @@ public class TokenService : ITokenService
 
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenOptions.SecretKey));
         var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512Signature);
-        var expirationDate = DateTime.UtcNow.AddDays(_tokenOptions.TokenLifetimeInMinutes);
+        DateTime expirationDate = DateTime.UtcNow.AddDays(_tokenOptions.TokenLifetimeInMinutes);
 
         var securityToken = new JwtSecurityToken(claims: claims, signingCredentials: signingCredentials,
             expires: expirationDate);
 
         var securityTokenHandler = new JwtSecurityTokenHandler();
-        var accessToken = securityTokenHandler.WriteToken(securityToken);
+        string? accessToken = securityTokenHandler.WriteToken(securityToken);
 
         return accessToken;
     }
 
     public async Task<RefreshToken> GenerateRefreshTokenAsync(int userId)
     {
-        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        string? token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var refreshTokenModel = new RefreshToken
         {
             Token = token,
@@ -69,7 +69,7 @@ public class TokenService : ITokenService
 
     public async Task<Result> ValidateRefreshToken(string token)
     {
-        var refreshToken = await _unitOfWork.TokenRepository.GetRefreshTokenByTokenAsync(token);
+        RefreshToken? refreshToken = await _unitOfWork.TokenRepository.GetRefreshTokenByTokenAsync(token);
         if (refreshToken is null || refreshToken.IsRevoked || refreshToken.ExpirationDate < DateTime.UtcNow)
         {
             return Result.Fail(new InvalidOperationError("Invalid token."));

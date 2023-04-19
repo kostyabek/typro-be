@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using FluentResults;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Typro.Application.Models.Auth;
@@ -30,14 +32,14 @@ public class AuthController : ControllerBase
     [HttpPost("sign-up")]
     public async Task<IActionResult> SignUpAsync(UserSignUpRequest request)
     {
-        var validationResult = await _signUpRequestValidator.ValidateAsync(request);
+        ValidationResult? validationResult = await _signUpRequestValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
             return validationResult.ToActionResult();
         }
         
         var dto = new UserSignUpDto(request.Email, request.Password);
-        var result = await _authService.SignUpAsync(dto);
+        Result<UserAuthResponseDto>? result = await _authService.SignUpAsync(dto);
 
         return result.ToActionResult();
     }
@@ -45,14 +47,14 @@ public class AuthController : ControllerBase
     [HttpPost("sign-in")]
     public async Task<IActionResult> SignInAsync(UserSignInRequest request)
     {
-        var validationResult = await _signInRequestValidator.ValidateAsync(request);
+        ValidationResult? validationResult = await _signInRequestValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
             return validationResult.ToActionResult();
         }
         
         var dto = new UserSignInDto(request.Email, request.Password);
-        var result = await _authService.SignInAsync(dto);
+        Result<UserAuthResponseDto>? result = await _authService.SignInAsync(dto);
         return result.ToActionResult();
     }
     
@@ -60,14 +62,14 @@ public class AuthController : ControllerBase
     [Authorize]
     public Task<IActionResult> SignOutAsync()
     {
-        var result = _authService.SignOut();
+        Result? result = _authService.SignOut();
         return Task.FromResult(result.ToActionResult());
     }
     
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshAccessTokenAsync()
     {
-        var result = await _authService.RefreshAccessTokenAsync();
+        Result<AccessTokenResponseDto>? result = await _authService.RefreshAccessTokenAsync();
         return result.ToActionResult();
     }
 }

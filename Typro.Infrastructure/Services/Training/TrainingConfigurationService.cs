@@ -26,7 +26,7 @@ public class TrainingConfigurationService : ITrainingConfigurationService
 
     public async Task<Result<int>> CreateDefaultTrainingConfigurationAsync()
     {
-        var generatedTrainingConfigurationId =
+        int generatedTrainingConfigurationId =
             await _unitOfWork.TrainingConfigurationRepository.CreateDefaultTrainingConfigurationAsync();
 
         return Result.Ok(generatedTrainingConfigurationId);
@@ -34,7 +34,7 @@ public class TrainingConfigurationService : ITrainingConfigurationService
 
     public async Task<Result<TrainingConfiguration>> GetTrainingConfigurationByIdAsync(int trainingConfigurationId)
     {
-        var trainingConfiguration =
+        TrainingConfiguration? trainingConfiguration =
             await _unitOfWork.TrainingConfigurationRepository
                 .GetTrainingConfigurationByIdAsync(trainingConfigurationId);
 
@@ -45,14 +45,14 @@ public class TrainingConfigurationService : ITrainingConfigurationService
 
     public async Task<Result> UpdateTrainingConfigurationAsync(TrainingConfigurationDto dto)
     {
-        var userId = _userIdentityService.UserId;
-        var userResult = await _userService.GetUserByIdAsync(userId);
+        int userId = _userIdentityService.UserId;
+        Result<Domain.Database.Models.User>? userResult = await _userService.GetUserByIdAsync(userId);
         if (userResult.IsFailed)
         {
             return userResult.ToResult();
         }
 
-        var user = userResult.Value;
+        Domain.Database.Models.User? user = userResult.Value;
 
         var trainingConfiguration = new TrainingConfiguration
         {

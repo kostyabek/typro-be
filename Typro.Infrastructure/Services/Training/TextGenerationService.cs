@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using Typro.Application.Models.Training;
 using Typro.Application.Services.Training;
+using Typro.Domain.Database.Models;
 using Typro.Domain.Enums.Training;
 using Typro.Domain.Models.Result.Errors;
 
@@ -22,14 +23,14 @@ public class TextGenerationService : ITextGenerationService
 
     public async Task<Result<IEnumerable<IEnumerable<char>>>> GenerateText(TrainingConfigurationDto dto)
     {
-        var supportedLanguagesResult = await _supportedLanguagesService.GetSupportedLanguagesAsync();
+        Result<IEnumerable<SupportedLanguageDto>> supportedLanguagesResult = await _supportedLanguagesService.GetSupportedLanguagesAsync();
         if (supportedLanguagesResult.IsFailed)
         {
             return Result.Fail(supportedLanguagesResult.Errors);
         }
 
-        var supportedLanguages = supportedLanguagesResult.Value;
-        var targetLanguage = supportedLanguages.SingleOrDefault(e => e.Id == dto.LanguageId);
+        IEnumerable<SupportedLanguageDto>? supportedLanguages = supportedLanguagesResult.Value;
+        SupportedLanguageDto? targetLanguage = supportedLanguages.SingleOrDefault(e => e.Id == dto.LanguageId);
         if (targetLanguage is null)
         {
             return Result.Fail(new NotFoundError("Could not find specified language."));
@@ -42,10 +43,10 @@ public class TextGenerationService : ITextGenerationService
         }
         else
         {
-            numberOfWords = 100;
+            numberOfWords = 21;
         }
 
-        var generatedText = await GenerateSymbols(
+        IEnumerable<IEnumerable<char>> generatedText = await GenerateSymbols(
             numberOfWords,
             dto.LanguageId,
             dto.IsPunctuationEnabled,
@@ -60,9 +61,9 @@ public class TextGenerationService : ITextGenerationService
         bool isPunctuationEnabled,
         bool areNumbersEnabled)
     {
-        var wordsResult = await _wordsService.GetNRandomWordsByLanguageAsync(languageId, numberOfWords);
+        Result<IEnumerable<Word>> wordsResult = await _wordsService.GetNRandomWordsByLanguageAsync(languageId, numberOfWords);
         
-        var words = wordsResult
+        List<string> words = wordsResult
             .Value
             .Select(w => w.Name)
             .ToList();
@@ -71,30 +72,30 @@ public class TextGenerationService : ITextGenerationService
         if (areNumbersEnabled)
         {
             var indicesSet = new HashSet<int>();
-            foreach (var _ in words)
+            foreach (string _ in words)
             {
-                var shouldBeInserted = random.Next(0, 10) is >= 3 and <= 6;
+                bool shouldBeInserted = random.Next(0, 10) is >= 3 and <= 6;
                 if (shouldBeInserted)
                 {
                     indicesSet.Add(random.Next(0, words.Count));
                 }
             }
 
-            var orderedByDescIndicesList = indicesSet
+            List<int> orderedByDescIndicesList = indicesSet
                 .OrderDescending()
                 .ToList();
             
-            foreach (var index in orderedByDescIndicesList)
+            foreach (int index in orderedByDescIndicesList)
             {
-                var randomNumber = random.Next(0, 101);
+                int randomNumber = random.Next(0, 101);
                 words[index] = randomNumber.ToString();
             }
         }
         
         var result = new List<IEnumerable<char>>();
-        foreach (var word in words)
+        foreach (string word in words)
         {
-            var symbols = word.ToList();
+            List<char> symbols = word.ToList();
             if (isPunctuationEnabled)
             {
                 InsertPunctuation(symbols, random);
@@ -108,14 +109,14 @@ public class TextGenerationService : ITextGenerationService
 
     private void InsertPunctuation(ICollection<char> chars, Random random)
     {
-        var randomNumber = random.Next(0, 10);
-        var shouldBeInserted = randomNumber is >= 0 and < 2 or 7 ;
+        int randomNumber = random.Next(0, 10);
+        bool shouldBeInserted = randomNumber is >= 0 and < 2 or 7 ;
         if (!shouldBeInserted)
         {
             return;
         }
 
-        var punctuationSymbol = _punctuationSymbols[random.Next(0, _punctuationSymbols.Length)];
+        char punctuationSymbol = _punctuationSymbols[random.Next(0, _punctuationSymbols.Length)];
         chars.Add(punctuationSymbol);
     }
 }

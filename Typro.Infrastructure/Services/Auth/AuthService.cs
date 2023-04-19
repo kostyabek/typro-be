@@ -6,6 +6,7 @@ using Typro.Application.Services.Auth;
 using Typro.Application.Services.Training;
 using Typro.Application.Services.User;
 using Typro.Application.UnitsOfWork;
+using Typro.Domain.Database.Models;
 using Typro.Domain.Enums.User;
 using Typro.Domain.Models.Result.Errors;
 
@@ -41,33 +42,33 @@ public class AuthService : IAuthService
 
     public async Task<Result<UserAuthResponseDto>> SignUpAsync(UserSignUpDto dto)
     {
-        var userResult = await _userService.GetUserByEmailAsync(dto.Email);
+        Result<Domain.Database.Models.User>? userResult = await _userService.GetUserByEmailAsync(dto.Email);
         if (!userResult.HasError<NotFoundError>())
         {
             return Result.Fail(new InvalidOperationError("The user already exists."));
         }
 
-        var passwordHash = BC.HashPassword(dto.Password);
+        string? passwordHash = BC.HashPassword(dto.Password);
 
         _unitOfWork.BeginTransaction();
         try
         {
-            var trainingConfigurationCreationResult =
+            Result<int>? trainingConfigurationCreationResult =
                 await _trainingConfigurationService.CreateDefaultTrainingConfigurationAsync();
 
-            var createdDate = DateTime.UtcNow;
-            var nickname = _nicknameHelper.GenerateNicknameFromDate(createdDate);
+            DateTime createdDate = DateTime.UtcNow;
+            string? nickname = _nicknameHelper.GenerateNicknameFromDate(createdDate);
             var createUserModel =
                 new CreateUserDto(dto.Email, passwordHash, UserRole.User, trainingConfigurationCreationResult.Value,
                     nickname, createdDate);
 
-            var userCreationResult = await _userService.CreateUserAsync(createUserModel);
+            Result<int>? userCreationResult = await _userService.CreateUserAsync(createUserModel);
 
             userResult = await _userService.GetUserByEmailAsync(dto.Email);
-            var user = userResult.Value;
+            Domain.Database.Models.User? user = userResult.Value;
 
-            var accessToken = _tokenService.GenerateAccessToken(user);
-            var refreshToken = await _tokenService.GenerateRefreshTokenAsync(userCreationResult.Value);
+            string? accessToken = _tokenService.GenerateAccessToken(user);
+            RefreshToken? refreshToken = await _tokenService.GenerateRefreshTokenAsync(userCreationResult.Value);
             _unitOfWork.CommitTransaction();
 
             var refreshTokenDto = new RefreshTokenDto(refreshToken.Token, refreshToken.ExpirationDate);
@@ -85,22 +86,22 @@ public class AuthService : IAuthService
 
     public async Task<Result<UserAuthResponseDto>> SignInAsync(UserSignInDto dto)
     {
-        var userResult = await _userService.GetUserByEmailAsync(dto.Email);
+        Result<Domain.Database.Models.User>? userResult = await _userService.GetUserByEmailAsync(dto.Email);
         if (userResult.HasError<NotFoundError>())
         {
             return Result.Fail(new InvalidOperationError("Invalid login/password."));
         }
 
-        var user = userResult.Value;
+        Domain.Database.Models.User? user = userResult.Value;
 
-        var isValidPassword = BC.Verify(dto.Password, user.PasswordHash);
+        bool isValidPassword = BC.Verify(dto.Password, user.PasswordHash);
         if (!isValidPassword)
         {
             return Result.Fail(new InvalidOperationError("Invalid login/password."));
         }
 
-        var accessToken = _tokenService.GenerateAccessToken(user);
-        var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.Id);
+        string? accessToken = _tokenService.GenerateAccessToken(user);
+        RefreshToken? refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.Id);
 
         var refreshTokenDto = new RefreshTokenDto(refreshToken.Token, refreshToken.ExpirationDate);
         _cookieService.SetRefreshTokenCookie(refreshTokenDto);
@@ -117,27 +118,27 @@ public class AuthService : IAuthService
 
     public async Task<Result<AccessTokenResponseDto>> RefreshAccessTokenAsync()
     {
-        if (!_cookieService.TryGetRefreshTokenFromCookie(out var refreshToken))
+        if (!_cookieService.TryGetRefreshTokenFromCookie(out string? refreshToken))
         {
             SignOut();
             return Result.Fail(new InvalidOperationError("Invalid token."));
         }
 
-        var validationResult = await _tokenService.ValidateRefreshToken(refreshToken);
+        Result? validationResult = await _tokenService.ValidateRefreshToken(refreshToken);
         if (validationResult.IsFailed)
         {
             SignOut();
             return validationResult;
         }
 
-        var userId = _userIdentityService.UserId;
-        var userResult = await _userService.GetUserByIdAsync(userId);
+        int userId = _userIdentityService.UserId;
+        Result<Domain.Database.Models.User>? userResult = await _userService.GetUserByIdAsync(userId);
         if (userResult.IsFailed)
         {
             return Result.Fail(userResult.Errors);
         }
 
-        var accessToken = _tokenService.GenerateAccessToken(userResult.Value);
+        string? accessToken = _tokenService.GenerateAccessToken(userResult.Value);
         var responseDto = new AccessTokenResponseDto(accessToken);
 
         return Result.Ok(responseDto);
