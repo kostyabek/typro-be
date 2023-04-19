@@ -16,7 +16,7 @@ public class WordsService : IWordsService
 
     public async Task<Result<IEnumerable<Word>>> GetNRandomWordsByLanguageAsync(int languageId, int numberOfWords)
     {
-        var words = await _unitOfWork.WordRepository.GetNRandomWordsByLanguageAsync(languageId, numberOfWords);
+        IEnumerable<Word>? words = await _unitOfWork.WordRepository.GetNRandomWordsByLanguageAsync(languageId, numberOfWords);
         return Result.Ok(words);
     }
 }

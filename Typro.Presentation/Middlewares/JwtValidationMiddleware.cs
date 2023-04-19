@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Typro.Application.Services.User;
 using Typro.Application.UnitsOfWork;
+using Typro.Domain.Database.Models;
+using Typro.Domain.Enums.User;
 
 namespace Typro.Presentation.Middlewares;
 
@@ -22,12 +24,12 @@ public class JwtValidationMiddleware
             await _next(context);
             return;
         }
-        var cancellationToken = context.RequestAborted;
+        CancellationToken cancellationToken = context.RequestAborted;
 
-        var userId = userIdentityService.UserId;
-        var userEmail = userIdentityService.UserEmail;
-        var userRole = userIdentityService.UserRole;
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        int userId = userIdentityService.UserId;
+        string? userEmail = userIdentityService.UserEmail;
+        UserRole userRole = userIdentityService.UserRole;
+        User? user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user is null || user.Email != userEmail || user.RoleId != userRole)
         {
             var problem = new ProblemDetails
