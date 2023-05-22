@@ -17,6 +17,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
 
     public IWordRepository WordRepository { get; }
     public ITrainingResultsRepository TrainingResultsRepository { get; }
+    public IPreparedMultiplayerTextsRepository PreparedMultiplayerTextsRepository { get; }
 
     private readonly ConnectionWrapper _connectionWrapper;
 
@@ -34,6 +35,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
         SupportedLanguagesRepository = new SupportedLanguagesRepository(_connectionWrapper);
         WordRepository = new WordRepository(_connectionWrapper);
         TrainingResultsRepository = new TrainingResultsRepository(_connectionWrapper);
+        PreparedMultiplayerTextsRepository = new PreparedMultiplayerTextsRepository(_connectionWrapper);
     }
 
     public void BeginTransaction()

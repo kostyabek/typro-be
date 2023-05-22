@@ -24,6 +24,7 @@ public class TrainingController : ControllerBase
     private readonly ITextGenerationService _textGenerationService;
     private readonly IUserIdentityService _userIdentityService;
     private readonly ITrainingResultsService _trainingResultsService;
+    private readonly IPreparedMultiplayerTextsService _preparedMultiplayerTextsService;
 
     public TrainingController(
         ITrainingConfigurationService trainingConfigurationService,
@@ -31,7 +32,8 @@ public class TrainingController : ControllerBase
         IValidator<UpdateTrainingConfigurationRequest> updateTrainingConfigurationRequestValidator,
         ITextGenerationService textGenerationService,
         IUserIdentityService userIdentityService,
-        ITrainingResultsService trainingResultsService)
+        ITrainingResultsService trainingResultsService,
+        IPreparedMultiplayerTextsService preparedMultiplayerTextsService)
     {
         _trainingConfigurationService = trainingConfigurationService;
         _supportedLanguagesService = supportedLanguagesService;
@@ -39,6 +41,7 @@ public class TrainingController : ControllerBase
         _textGenerationService = textGenerationService;
         _userIdentityService = userIdentityService;
         _trainingResultsService = trainingResultsService;
+        _preparedMultiplayerTextsService = preparedMultiplayerTextsService;
     }
 
     [HttpGet("supported-languages")]
@@ -90,7 +93,35 @@ public class TrainingController : ControllerBase
             request.TimeMode,
             request.LanguageId);
 
-        Result<IEnumerable<IEnumerable<char>>> result = await _textGenerationService.GenerateText(dto);
+        Result<IEnumerable<string>> wordsResult = await _textGenerationService.GenerateText(dto);
+        if (wordsResult.IsFailed)
+        {
+            return wordsResult.ToActionResult();
+        }
+
+        Result<IEnumerable<IEnumerable<char>>> symbolsResult =
+            _textGenerationService.ConvertWordsToSymbols(wordsResult.Value);
+
+        return symbolsResult.ToActionResult();
+    }
+
+    [HttpGet("multiplayer-text-generation")]
+    [Authorize]
+    public async Task<IActionResult> GetMultiplayerGeneratedTextAsync(
+        [FromQuery] GetGeneratedTextRequest request,
+        [FromQuery] string lobbyId,
+        [FromQuery] bool isForceRewrite)
+    {
+        var dto = new TrainingConfigurationDto(
+            request.IsPunctuationGenerated,
+            request.AreNumbersGenerated,
+            request.WordsMode,
+            request.TimeMode,
+            request.LanguageId);
+
+        Result<PreparedMultiplayerTextInfoDto> result =
+            await _preparedMultiplayerTextsService.GetOrCreateTrainingTextAsync(dto, lobbyId, isForceRewrite);
+
         return result.ToActionResult();
     }
 

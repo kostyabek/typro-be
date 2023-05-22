@@ -74,7 +74,7 @@ public class AuthService : IAuthService
             var refreshTokenDto = new RefreshTokenDto(refreshToken.Token, refreshToken.ExpirationDate);
             _cookieService.SetRefreshTokenCookie(refreshTokenDto);
 
-            var responseDto = new UserAuthResponseDto(accessToken, user.Email);
+            var responseDto = new UserAuthResponseDto(accessToken, user.Email, user.Nickname);
             return Result.Ok(responseDto);
         }
         catch (Exception)
@@ -106,7 +106,7 @@ public class AuthService : IAuthService
         var refreshTokenDto = new RefreshTokenDto(refreshToken.Token, refreshToken.ExpirationDate);
         _cookieService.SetRefreshTokenCookie(refreshTokenDto);
 
-        var responseDto = new UserAuthResponseDto(accessToken, user.Email);
+        var responseDto = new UserAuthResponseDto(accessToken, user.Email, user.Nickname);
         return Result.Ok(responseDto);
     }
 

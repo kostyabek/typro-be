@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using System.Text;
+using FluentResults;
 using Typro.Application.Models.Training;
 using Typro.Application.Services.Training;
 using Typro.Domain.Database.Models;
@@ -21,9 +22,10 @@ public class TextGenerationService : ITextGenerationService
         _wordsService = wordsService;
     }
 
-    public async Task<Result<IEnumerable<IEnumerable<char>>>> GenerateText(TrainingConfigurationDto dto)
+    public async Task<Result<IEnumerable<string>>> GenerateText(TrainingConfigurationDto dto)
     {
-        Result<IEnumerable<SupportedLanguageDto>> supportedLanguagesResult = await _supportedLanguagesService.GetSupportedLanguagesAsync();
+        Result<IEnumerable<SupportedLanguageDto>> supportedLanguagesResult =
+            await _supportedLanguagesService.GetSupportedLanguagesAsync();
         if (supportedLanguagesResult.IsFailed)
         {
             return Result.Fail(supportedLanguagesResult.Errors);
@@ -43,80 +45,67 @@ public class TextGenerationService : ITextGenerationService
         }
         else
         {
-            numberOfWords = 21;
+            numberOfWords = 150;
         }
 
-        IEnumerable<IEnumerable<char>> generatedText = await GenerateSymbols(
-            numberOfWords,
-            dto.LanguageId,
-            dto.IsPunctuationEnabled,
-            dto.AreNumbersEnabled);
-        
-        return Result.Ok(generatedText);
-    }
+        Result<IEnumerable<Word>> wordsResult =
+            await _wordsService.GetNRandomWordsByLanguageAsync(dto.LanguageId, numberOfWords);
 
-    private async Task<IEnumerable<IEnumerable<char>>> GenerateSymbols(
-        int numberOfWords,
-        int languageId,
-        bool isPunctuationEnabled,
-        bool areNumbersEnabled)
-    {
-        Result<IEnumerable<Word>> wordsResult = await _wordsService.GetNRandomWordsByLanguageAsync(languageId, numberOfWords);
-        
         List<string> words = wordsResult
             .Value
             .Select(w => w.Name)
             .ToList();
-
+        
         var random = new Random();
-        if (areNumbersEnabled)
+        if (dto.AreNumbersEnabled)
         {
-            var indicesSet = new HashSet<int>();
-            foreach (string _ in words)
+            for (var i = 0; i < words.Count; i++)
             {
-                bool shouldBeInserted = random.Next(0, 10) is >= 3 and <= 6;
-                if (shouldBeInserted)
+                int index = random.Next(0, words.Count);
+                bool shouldInsertNumber = random.Next(0, 10) is >= 3 and <= 6;
+                if (!shouldInsertNumber)
                 {
-                    indicesSet.Add(random.Next(0, words.Count));
+                    continue;
                 }
-            }
 
-            List<int> orderedByDescIndicesList = indicesSet
-                .OrderDescending()
-                .ToList();
-            
-            foreach (int index in orderedByDescIndicesList)
-            {
                 int randomNumber = random.Next(0, 101);
                 words[index] = randomNumber.ToString();
             }
         }
         
+        if (dto.IsPunctuationEnabled)
+        {
+            var stringBuilder = new StringBuilder();
+            for (var i = 0; i < words.Count; i++)
+            {
+                stringBuilder.Clear();
+
+                bool shouldInsertPunctuation = random.Next(0, 10) is >= 0 and < 2 or 7;
+                if (!shouldInsertPunctuation)
+                {
+                    continue;
+                }
+
+                char punctuationSymbol = _punctuationSymbols[random.Next(0, _punctuationSymbols.Length)];
+                stringBuilder.Append(words[i]).Append(punctuationSymbol);
+                words[i] = stringBuilder.ToString();
+            }
+        }
+
+        return Result.Ok(words.AsEnumerable());
+    }
+
+    public Result<IEnumerable<IEnumerable<char>>> ConvertWordsToSymbols(IEnumerable<string> words)
+    {
+        List<string> wordsList = words.ToList();
+
         var result = new List<IEnumerable<char>>();
-        foreach (string word in words)
+        foreach (string word in wordsList)
         {
             List<char> symbols = word.ToList();
-            if (isPunctuationEnabled)
-            {
-                InsertPunctuation(symbols, random);
-            }
-
             result.Add(symbols);
         }
 
-        return result;
-    }
-
-    private void InsertPunctuation(ICollection<char> chars, Random random)
-    {
-        int randomNumber = random.Next(0, 10);
-        bool shouldBeInserted = randomNumber is >= 0 and < 2 or 7 ;
-        if (!shouldBeInserted)
-        {
-            return;
-        }
-
-        char punctuationSymbol = _punctuationSymbols[random.Next(0, _punctuationSymbols.Length)];
-        chars.Add(punctuationSymbol);
+        return Result.Ok(result.AsEnumerable());
     }
 }
