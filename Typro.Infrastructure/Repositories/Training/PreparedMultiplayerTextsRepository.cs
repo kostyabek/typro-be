@@ -51,4 +51,22 @@ public class PreparedMultiplayerTextsRepository : DatabaseConnectable, IPrepared
                 preparedMultiplayerText.AreNumbersEnabled
             },
             ConnectionWrapper.Transaction);
+
+    public Task<int> Delete(string lobbyId)
+        => ConnectionWrapper.Connection.ExecuteAsync(
+            PreparedMultiplayerTextsQueries.Delete,
+            new
+            {
+                LobbyId = lobbyId
+            },
+            ConnectionWrapper.Transaction);
+    
+    public Task<bool> CheckIfLobbyExists(string lobbyId)
+        => ConnectionWrapper.Connection.ExecuteScalarAsync<bool>(
+            PreparedMultiplayerTextsQueries.CheckIfLLobbyExists,
+            new
+            {
+                LobbyId = lobbyId
+            },
+            ConnectionWrapper.Transaction);
 }

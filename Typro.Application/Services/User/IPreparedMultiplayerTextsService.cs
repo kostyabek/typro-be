@@ -9,4 +9,6 @@ public interface IPreparedMultiplayerTextsService
         TrainingConfigurationDto dto,
         string lobbyId,
         bool isForceRewrite);
+    Task<Result> DeleteLobby(string lobbyId);
+    Task<Result<bool>> CheckIfLobbyExists(string lobbyId);
 }

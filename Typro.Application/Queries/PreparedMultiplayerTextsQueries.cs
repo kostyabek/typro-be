@@ -20,4 +20,18 @@ UPDATE dbo.PreparedMultiplayerTexts SET
     IsPunctuationEnabled = @IsPunctuationEnabled,
     AreNumbersEnabled = @AreNumbersEnabled
 WHERE LobbyId = @LobbyId;";
+    
+    public const string Delete = @"
+DELETE FROM dbo.PreparedMultiplayerTexts
+WHERE LobbyId = @LobbyId;";
+    
+    public const string CheckIfLLobbyExists = @"
+IF EXISTS (SELECT 1 FROM [dbo].[PreparedMultiplayerTexts] WHERE LobbyId = @LobbyId)
+BEGIN
+    SELECT CONVERT(bit, 1);
+END
+ELSE
+BEGIN
+    SELECT CONVERT(bit, 0);
+END";
 }

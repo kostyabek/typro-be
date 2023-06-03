@@ -5,6 +5,7 @@ using Typro.Application.Services.Training;
 using Typro.Application.Services.User;
 using Typro.Application.UnitsOfWork;
 using Typro.Domain.Database.Models;
+using Typro.Domain.Models.Result.Errors;
 
 namespace Typro.Infrastructure.Services.Training;
 
@@ -115,6 +116,20 @@ public class PreparedMultiplayerTextsService : IPreparedMultiplayerTextsService
             dto.AreNumbersEnabled, dto.WordsMode, dto.TimeMode, dto.LanguageId));
     }
 
+    public async Task<Result> DeleteLobby(string lobbyId)
+    {
+        int rowsAffected = await _unitOfWork.PreparedMultiplayerTextsRepository.Delete(lobbyId);
+        return rowsAffected == 0
+            ? Result.Fail(new NotFoundError("Lobby does not exist"))
+            : Result.Ok();
+    }
+    
+    public async Task<Result<bool>> CheckIfLobbyExists(string lobbyId)
+    {
+        bool exists = await _unitOfWork.PreparedMultiplayerTextsRepository.CheckIfLobbyExists(lobbyId);
+        return Result.Ok(exists);
+    }
+    
     private static string PrepareText(IEnumerable<string> words)
     {
         IEnumerable<string> wordsList = words.ToList();

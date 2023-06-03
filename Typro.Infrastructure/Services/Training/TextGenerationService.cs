@@ -55,7 +55,7 @@ public class TextGenerationService : ITextGenerationService
             .Value
             .Select(w => w.Name)
             .ToList();
-        
+
         var random = new Random();
         if (dto.AreNumbersEnabled)
         {
@@ -72,7 +72,7 @@ public class TextGenerationService : ITextGenerationService
                 words[index] = randomNumber.ToString();
             }
         }
-        
+
         if (dto.IsPunctuationEnabled)
         {
             var stringBuilder = new StringBuilder();

@@ -8,4 +8,6 @@ public interface IPreparedMultiplayerTextsRepository
 
     Task<int> Insert(PreparedMultiplayerTextInfo preparedMultiplayerText);
     Task<int> Update(PreparedMultiplayerTextInfo preparedMultiplayerText);
+    Task<int> Delete(string lobbyId);
+    Task<bool> CheckIfLobbyExists(string lobbyId);
 }

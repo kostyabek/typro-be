@@ -124,6 +124,22 @@ public class TrainingController : ControllerBase
 
         return result.ToActionResult();
     }
+    
+    [HttpGet("lobby")]
+    [Authorize]
+    public async Task<IActionResult> CheckIfLobbyExistsAsync([FromQuery] string lobbyId)
+    {
+        Result<bool> result = await _preparedMultiplayerTextsService.CheckIfLobbyExists(lobbyId);
+        return result.ToActionResult();
+    }
+    
+    [HttpDelete("lobby")]
+    [Authorize]
+    public async Task<IActionResult> DeleteLobbyInfoAsync([FromQuery] string lobbyId)
+    {
+        Result result = await _preparedMultiplayerTextsService.DeleteLobby(lobbyId);
+        return result.ToActionResult();
+    }
 
     [HttpPost("results")]
     [Authorize]
