@@ -195,9 +195,9 @@ FROM (SELECT ROW_NUMBER() OVER (PARTITION BY tr.WordsModeType, tr.TimeModeType O
              tr.UserId
       FROM dbo.TrainingResults tr
                join dbo.Users u ON tr.UserId = u.Id
-      WHERE tr.WordsPerMinute <> -1) as temp
+      WHERE tr.WordsPerMinute <> -1
+        AND u.Id = @UserId) as temp
 WHERE temp.RowNumber = 1
-  AND temp.UserId = @UserId
 GO
 
 /*----- 10-04-2023 -----*/
@@ -231,4 +231,44 @@ FROM (SELECT ROW_NUMBER() OVER (PARTITION BY u.Nickname ORDER BY tr.WordsPerMinu
 WHERE temp.LocalPlace = 1
 ORDER BY Place
 OFFSET (@PageNumber - 1) * @PageSize ROWS FETCH NEXT @PageSize ROWS ONLY
+GO
+
+/*----- 07-05-2023 -----*/
+-- Add PreparedMultiplayerTexts table
+IF NOT EXISTS(SELECT *
+              FROM sysobjects
+              WHERE name = 'PreparedMultiplayerTexts'
+                and xtype = 'U')
+CREATE TABLE PreparedMultiplayerTexts
+(
+    LobbyId              varchar(32) PRIMARY KEY NOT NULL,
+    [Text]               nvarchar(max),
+    WordsModeType        int                     NOT NULL DEFAULT 25 CHECK (WordsModeType IN (0, 10, 25, 50, 100)),
+    TimeModeType         int                     NOT NULL DEFAULT 0 CHECK (TimeModeType IN (0, 15, 30, 60, 120)),
+    LanguageId           int                     NOT NULL,
+    IsPunctuationEnabled bit                     NOT NULL,
+    AreNumbersEnabled     bit                     NOT NULL
+)
+GO
+
+/*----- 21-05-2023 -----*/
+-- Add WpmToAccuracyStats stored procedure
+CREATE PROCEDURE dbo.WpmToAccuracyStats @UserId int, @FromDate datetime2, @LanguageId int, @WordsModeType int,
+                                        @TimeModeType int
+AS
+SELECT temp.WordsPerMinute,
+       temp.Accuracy,
+       temp.DateConducted
+FROM (SELECT ROW_NUMBER() OVER (PARTITION BY CONVERT(varchar(10), tr.DateConducted, 104) ORDER BY tr.WordsPerMinute desc) AS RowNumber,
+             tr.WordsPerMinute,
+             tr.Accuracy,
+             tr.DateConducted
+      FROM dbo.TrainingResults tr
+      WHERE tr.UserId = @UserId
+        AND tr.WordsPerMinute <> -1
+        AND tr.DateConducted > @FromDate
+        AND tr.LanguageId = @LanguageId
+        AND tr.WordsModeType = @WordsModeType
+        AND tr.TimeModeType = @TimeModeType) as temp
+WHERE temp.RowNumber = 1
 GO

@@ -10,6 +10,7 @@ public interface IUnitOfWork
     public ISupportedLanguagesRepository SupportedLanguagesRepository { get; }
     public IWordRepository WordRepository { get; } 
     public ITrainingResultsRepository TrainingResultsRepository { get; } 
+    public IPreparedMultiplayerTextsRepository PreparedMultiplayerTextsRepository { get; } 
     public void BeginTransaction();
     public void RollbackTransaction();
     public void CommitTransaction();

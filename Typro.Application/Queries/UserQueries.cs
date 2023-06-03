@@ -30,4 +30,13 @@ SELECT
     Nickname
 FROM dbo.Users 
 WHERE Email = @UserEmail;";
+    
+    public const string GetNicknameById = @"
+SELECT
+    Nickname
+FROM dbo.Users
+WHERE Id = @UserId;";
+
+    public const string EditNicknameById = @"
+UPDATE dbo.Users SET Nickname = @Nickname WHERE Id = @Id;";
 }

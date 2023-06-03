@@ -77,6 +77,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITextGenerationService, TextGenerationService>();
         services.AddScoped<IWordsService, WordsService>();
         services.AddScoped<ITrainingResultsService, TrainingResultsService>();
+        services.AddScoped<IPreparedMultiplayerTextsService, PreparedMultiplayerTextsService>();
 
         return services;
     }
