@@ -6,12 +6,8 @@ using Typro.Domain.Database.Models;
 
 namespace Typro.Infrastructure.Repositories.Training;
 
-public class SupportedLanguagesRepository : DatabaseConnectable, ISupportedLanguagesRepository
+public class SupportedLanguagesRepository(ConnectionWrapper connectionWrapper) : DatabaseConnectable(connectionWrapper), ISupportedLanguagesRepository
 {
-    public SupportedLanguagesRepository(ConnectionWrapper connectionWrapper) : base(connectionWrapper)
-    {
-    }
-
     public Task<IEnumerable<SupportedLanguage>> GetSupportedLanguagesAsync()
         => ConnectionWrapper.Connection.QueryAsync<SupportedLanguage>(SupportedLanguagesQueries.GetSupportedLanguages,
             transaction: ConnectionWrapper.Transaction);

@@ -6,12 +6,8 @@ using Typro.Domain.Database.Models;
 
 namespace Typro.Infrastructure.Repositories.Training;
 
-public class TrainingConfigurationRepository : DatabaseConnectable, ITrainingConfigurationRepository
+public class TrainingConfigurationRepository(ConnectionWrapper connectionWrapper) : DatabaseConnectable(connectionWrapper), ITrainingConfigurationRepository
 {
-    public TrainingConfigurationRepository(ConnectionWrapper connectionWrapper) : base(connectionWrapper)
-    {
-    }
-
     public Task<int> CreateDefaultTrainingConfigurationAsync()
         => ConnectionWrapper.Connection.ExecuteScalarAsync<int>(TrainingConfigurationQueries.InsertDefaultTrainingConfiguration,
             transaction: ConnectionWrapper.Transaction);

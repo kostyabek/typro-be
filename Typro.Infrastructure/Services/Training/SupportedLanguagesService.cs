@@ -6,19 +6,12 @@ using Typro.Domain.Database.Models;
 
 namespace Typro.Infrastructure.Services.Training;
 
-public class SupportedLanguagesService : ISupportedLanguagesService
+public class SupportedLanguagesService(IUnitOfWork unitOfWork) : ISupportedLanguagesService
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public SupportedLanguagesService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
-
     public async Task<Result<IEnumerable<SupportedLanguageDto>>> GetSupportedLanguagesAsync()
     {
         IEnumerable<SupportedLanguage> supportedLanguages =
-            await _unitOfWork.SupportedLanguagesRepository.GetSupportedLanguagesAsync();
+            await unitOfWork.SupportedLanguagesRepository.GetSupportedLanguagesAsync();
 
         IEnumerable<SupportedLanguageDto> dtos = supportedLanguages.Select(e =>
             new SupportedLanguageDto(e.Id, e.Name,

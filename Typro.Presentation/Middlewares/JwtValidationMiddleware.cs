@@ -8,20 +8,13 @@ using Typro.Domain.Enums.User;
 
 namespace Typro.Presentation.Middlewares;
 
-public class JwtValidationMiddleware
+public class JwtValidationMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-    
-    public JwtValidationMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task InvokeAsync(HttpContext context, IUserIdentityService userIdentityService, IUnitOfWork unitOfWork)
     {
         if (context.User.Identity is not { IsAuthenticated: true })
         {
-            await _next(context);
+            await next(context);
             return;
         }
         CancellationToken cancellationToken = context.RequestAborted;
@@ -42,7 +35,7 @@ public class JwtValidationMiddleware
             return;
         }
 
-        await _next(context);
+        await next(context);
     }
 }
 

@@ -2,10 +2,7 @@
 
 namespace Typro.Domain.Models.Result.Errors
 {
-    public class NotFoundError : Error
+    public class NotFoundError(string msg) : Error(msg)
     {
-        public NotFoundError(string msg) : base(msg)
-        {
-        }
     }
 }

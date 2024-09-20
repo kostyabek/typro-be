@@ -4,16 +4,9 @@ using Typro.Application.Services.Auth;
 
 namespace Typro.Infrastructure.Services.Auth;
 
-public class CookieService : ICookieService
+public class CookieService(IHttpContextAccessor httpContextAccessor) : ICookieService
 {
     private const string RefreshTokenCookieName = "refreshToken";
-
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public CookieService(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
 
     public void SetRefreshTokenCookie(RefreshTokenDto dto)
     {
@@ -25,12 +18,12 @@ public class CookieService : ICookieService
             Secure = true
         };
 
-        _httpContextAccessor.HttpContext?.Response.Cookies.Append(RefreshTokenCookieName, dto.Token, cookieOptions);
+        httpContextAccessor.HttpContext?.Response.Cookies.Append(RefreshTokenCookieName, dto.Token, cookieOptions);
     }
 
     public void RemoveRefreshTokenCookie()
-        => _httpContextAccessor.HttpContext?.Response.Cookies.Delete(RefreshTokenCookieName);
+        => httpContextAccessor.HttpContext?.Response.Cookies.Delete(RefreshTokenCookieName);
 
     public bool TryGetRefreshTokenFromCookie(out string token)
-        => _httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(RefreshTokenCookieName, out token);
+        => httpContextAccessor.HttpContext.Request.Cookies.TryGetValue(RefreshTokenCookieName, out token);
 }

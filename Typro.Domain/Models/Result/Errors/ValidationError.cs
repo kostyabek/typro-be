@@ -2,10 +2,7 @@
 
 namespace Typro.Domain.Models.Result.Errors
 {
-    public class ValidationError : Error
+    public class ValidationError(string msg) : Error(msg)
     {
-        public ValidationError(string msg) : base(msg)
-        {
-        }
     }
 }

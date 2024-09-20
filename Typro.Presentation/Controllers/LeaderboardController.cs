@@ -9,15 +9,8 @@ namespace Typro.Presentation.Controllers;
 
 [ApiController]
 [Route("leaderboards")]
-public class LeaderboardController : ControllerBase
+public class LeaderboardController(ITrainingResultsService trainingResultsService) : ControllerBase
 {
-    private readonly ITrainingResultsService _trainingResultsService;
-
-    public LeaderboardController(ITrainingResultsService trainingResultsService)
-    {
-        _trainingResultsService = trainingResultsService;
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetLeaderboardAsync([FromQuery] GetLeaderboardRequest request)
     {
@@ -31,7 +24,7 @@ public class LeaderboardController : ControllerBase
             request.PageSize);
 
         Result<IEnumerable<LeaderboardEntryDto>> result =
-            await _trainingResultsService.GetLeaderboardAsync(filterDto);
+            await trainingResultsService.GetLeaderboardAsync(filterDto);
 
         return result.ToActionResult();
     }

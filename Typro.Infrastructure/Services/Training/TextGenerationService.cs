@@ -8,24 +8,16 @@ using Typro.Domain.Models.Result.Errors;
 
 namespace Typro.Infrastructure.Services.Training;
 
-public class TextGenerationService : ITextGenerationService
+public class TextGenerationService(
+    ISupportedLanguagesService supportedLanguagesService,
+    IWordsService wordsService) : ITextGenerationService
 {
     private readonly char[] _punctuationSymbols = { '.', ',', '!', '?', ';', ':' };
-    private readonly ISupportedLanguagesService _supportedLanguagesService;
-    private readonly IWordsService _wordsService;
-
-    public TextGenerationService(
-        ISupportedLanguagesService supportedLanguagesService,
-        IWordsService wordsService)
-    {
-        _supportedLanguagesService = supportedLanguagesService;
-        _wordsService = wordsService;
-    }
 
     public async Task<Result<IEnumerable<string>>> GenerateText(TrainingConfigurationDto dto)
     {
         Result<IEnumerable<SupportedLanguageDto>> supportedLanguagesResult =
-            await _supportedLanguagesService.GetSupportedLanguagesAsync();
+            await supportedLanguagesService.GetSupportedLanguagesAsync();
         if (supportedLanguagesResult.IsFailed)
         {
             return Result.Fail(supportedLanguagesResult.Errors);
@@ -49,7 +41,7 @@ public class TextGenerationService : ITextGenerationService
         }
 
         Result<IEnumerable<Word>> wordsResult =
-            await _wordsService.GetNRandomWordsByLanguageAsync(dto.LanguageId, numberOfWords);
+            await wordsService.GetNRandomWordsByLanguageAsync(dto.LanguageId, numberOfWords);
 
         List<string> words = wordsResult
             .Value

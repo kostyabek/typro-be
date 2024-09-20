@@ -7,12 +7,8 @@ using Typro.Domain.Database.Models;
 
 namespace Typro.Infrastructure.Repositories.Training;
 
-public class PreparedMultiplayerTextsRepository : DatabaseConnectable, IPreparedMultiplayerTextsRepository
+public class PreparedMultiplayerTextsRepository(ConnectionWrapper connectionWrapper) : DatabaseConnectable(connectionWrapper), IPreparedMultiplayerTextsRepository
 {
-    public PreparedMultiplayerTextsRepository(ConnectionWrapper connectionWrapper) : base(connectionWrapper)
-    {
-    }
-
     public Task<PreparedMultiplayerTextInfo?> GetPreparedTextByLobbyId(string lobbyId)
         => ConnectionWrapper.Connection.QuerySingleOrDefaultAsync<PreparedMultiplayerTextInfo?>(
             PreparedMultiplayerTextsQueries.GetByLobbyId,

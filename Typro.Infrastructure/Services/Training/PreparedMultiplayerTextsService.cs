@@ -9,33 +9,24 @@ using Typro.Domain.Models.Result.Errors;
 
 namespace Typro.Infrastructure.Services.Training;
 
-public class PreparedMultiplayerTextsService : IPreparedMultiplayerTextsService
+public class PreparedMultiplayerTextsService(
+    ITextGenerationService textGenerationService,
+    IUnitOfWork unitOfWork) : IPreparedMultiplayerTextsService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ITextGenerationService _textGenerationService;
-
-    public PreparedMultiplayerTextsService(
-        ITextGenerationService textGenerationService,
-        IUnitOfWork unitOfWork)
-    {
-        _textGenerationService = textGenerationService;
-        _unitOfWork = unitOfWork;
-    }
-
     public async Task<Result<PreparedMultiplayerTextInfoDto>> GetOrCreateTrainingTextAsync(
         TrainingConfigurationDto dto,
         string lobbyId,
         bool isForceRewrite)
     {
         PreparedMultiplayerTextInfo? preparedTextInfo =
-            await _unitOfWork.PreparedMultiplayerTextsRepository
+            await unitOfWork.PreparedMultiplayerTextsRepository
                 .GetPreparedTextByLobbyId(lobbyId);
 
         if (preparedTextInfo is not null)
         {
             if (isForceRewrite)
             {
-                Result<IEnumerable<string>> forcedGeneratedWordsResult = await _textGenerationService.GenerateText(dto);
+                Result<IEnumerable<string>> forcedGeneratedWordsResult = await textGenerationService.GenerateText(dto);
                 if (forcedGeneratedWordsResult.IsFailed)
                 {
                     return forcedGeneratedWordsResult.ToResult();
@@ -53,9 +44,9 @@ public class PreparedMultiplayerTextsService : IPreparedMultiplayerTextsService
                     IsPunctuationEnabled = dto.IsPunctuationEnabled
                 };
                 int forceRowsAffected =
-                    await _unitOfWork.PreparedMultiplayerTextsRepository.Update(preparedMultiplayerText);
+                    await unitOfWork.PreparedMultiplayerTextsRepository.Update(preparedMultiplayerText);
                 Result<IEnumerable<IEnumerable<char>>> forceRewriteSymbolsResult =
-                    _textGenerationService.ConvertWordsToSymbols(forceGeneratedText.Split(' '));
+                    textGenerationService.ConvertWordsToSymbols(forceGeneratedText.Split(' '));
 
                 if (forceRewriteSymbolsResult.IsFailed)
                 {
@@ -70,7 +61,7 @@ public class PreparedMultiplayerTextsService : IPreparedMultiplayerTextsService
 
             IEnumerable<string> preparedWords = preparedTextInfo.Text.Split(' ');
             Result<IEnumerable<IEnumerable<char>>> symbolsResult =
-                _textGenerationService.ConvertWordsToSymbols(preparedWords);
+                textGenerationService.ConvertWordsToSymbols(preparedWords);
             if (symbolsResult.IsFailed)
             {
                 return symbolsResult.ToResult();
@@ -81,7 +72,7 @@ public class PreparedMultiplayerTextsService : IPreparedMultiplayerTextsService
                 preparedTextInfo.WordsModeType, preparedTextInfo.TimeModeType, preparedTextInfo.LanguageId));
         }
 
-        Result<IEnumerable<string>> generatedWordsResult = await _textGenerationService.GenerateText(dto);
+        Result<IEnumerable<string>> generatedWordsResult = await textGenerationService.GenerateText(dto);
         if (generatedWordsResult.IsFailed)
         {
             return generatedWordsResult.ToResult();
@@ -99,14 +90,14 @@ public class PreparedMultiplayerTextsService : IPreparedMultiplayerTextsService
             IsPunctuationEnabled = dto.IsPunctuationEnabled
         };
 
-        int rowsAffected = await _unitOfWork.PreparedMultiplayerTextsRepository.Insert(preparedMultiplayerTextModel);
+        int rowsAffected = await unitOfWork.PreparedMultiplayerTextsRepository.Insert(preparedMultiplayerTextModel);
         if (rowsAffected == 0)
         {
             return Result.Fail(new Error("Could not save prepared words"));
         }
 
         Result<IEnumerable<IEnumerable<char>>> newSymbolsResult =
-            _textGenerationService.ConvertWordsToSymbols(newGeneratedText.Split(' '));
+            textGenerationService.ConvertWordsToSymbols(newGeneratedText.Split(' '));
         if (newSymbolsResult.IsFailed)
         {
             return newSymbolsResult.ToResult();
@@ -118,7 +109,7 @@ public class PreparedMultiplayerTextsService : IPreparedMultiplayerTextsService
 
     public async Task<Result> DeleteLobby(string lobbyId)
     {
-        int rowsAffected = await _unitOfWork.PreparedMultiplayerTextsRepository.Delete(lobbyId);
+        int rowsAffected = await unitOfWork.PreparedMultiplayerTextsRepository.Delete(lobbyId);
         return rowsAffected == 0
             ? Result.Fail(new NotFoundError("Lobby does not exist"))
             : Result.Ok();
@@ -126,7 +117,7 @@ public class PreparedMultiplayerTextsService : IPreparedMultiplayerTextsService
     
     public async Task<Result<bool>> CheckIfLobbyExists(string lobbyId)
     {
-        bool exists = await _unitOfWork.PreparedMultiplayerTextsRepository.CheckIfLobbyExists(lobbyId);
+        bool exists = await unitOfWork.PreparedMultiplayerTextsRepository.CheckIfLobbyExists(lobbyId);
         return Result.Ok(exists);
     }
     

@@ -5,17 +5,11 @@ using Typro.Domain.Enums.User;
 
 namespace Typro.Infrastructure.Services.User;
 
-public class UserIdentityService : IUserIdentityService
+public class UserIdentityService(IHttpContextAccessor httpContextAccessor) : IUserIdentityService
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    public int UserId => int.Parse(_httpContextAccessor.HttpContext?.User.FindFirst("id").Value);
-    public string UserEmail => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email).Value;
+    public int UserId => int.Parse(httpContextAccessor.HttpContext?.User.FindFirst("id").Value);
+    public string UserEmail => httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email).Value;
 
     public UserRole UserRole =>
-        Enum.Parse<UserRole>(_httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Role).Value, true);
-
-    public UserIdentityService(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
+        Enum.Parse<UserRole>(httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Role).Value, true);
 }

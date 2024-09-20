@@ -2,10 +2,7 @@
 
 namespace Typro.Domain.Models.Result.Errors
 {
-    public class InvalidOperationError : Error
+    public class InvalidOperationError(string msg) : Error(msg)
     {
-        public InvalidOperationError(string msg) : base(msg)
-        {
-        }
     }
 }

@@ -2,12 +2,7 @@
 
 namespace Typro.Infrastructure.Repositories;
 
-public abstract class DatabaseConnectable
+public abstract class DatabaseConnectable(ConnectionWrapper connectionWrapper)
 {
-    protected ConnectionWrapper ConnectionWrapper { get; }
-    
-    protected DatabaseConnectable(ConnectionWrapper connectionWrapper)
-    {
-        ConnectionWrapper = connectionWrapper;
-    }
+    protected ConnectionWrapper ConnectionWrapper { get; } = connectionWrapper;
 }

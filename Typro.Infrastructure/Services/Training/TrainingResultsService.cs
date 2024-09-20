@@ -7,19 +7,12 @@ using Typro.Application.UnitsOfWork;
 
 namespace Typro.Infrastructure.Services.Training;
 
-public class TrainingResultsService : ITrainingResultsService
+public class TrainingResultsService(IUnitOfWork unitOfWork) : ITrainingResultsService
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public TrainingResultsService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
-
     public async Task<Result<int>> CreateTrainingResultsAsync(FullTrainingResultsDto dto)
     {
         int generatedTrainingConfigurationId =
-            await _unitOfWork.TrainingResultsRepository.CreateTrainingResultsAsync(dto);
+            await unitOfWork.TrainingResultsRepository.CreateTrainingResultsAsync(dto);
 
         return Result.Ok(generatedTrainingConfigurationId);
     }
@@ -27,7 +20,7 @@ public class TrainingResultsService : ITrainingResultsService
     public async Task<Result<int>> UpdateTrainingResultsAsync(UpdateTrainingResultsDto dto)
     {
         int generatedTrainingConfigurationId =
-            await _unitOfWork.TrainingResultsRepository.UpdateTrainingResultsAsync(dto);
+            await unitOfWork.TrainingResultsRepository.UpdateTrainingResultsAsync(dto);
 
         return Result.Ok(generatedTrainingConfigurationId);
     }
@@ -35,7 +28,7 @@ public class TrainingResultsService : ITrainingResultsService
     public async Task<Result<HighLevelProfileInfoDto>> GetHighLevelProfileInfoAsync(int userId)
     {
         HighLevelProfileInfoDto highLevelProfileInfo =
-            await _unitOfWork.TrainingResultsRepository.GetTrainingCountAsync(userId);
+            await unitOfWork.TrainingResultsRepository.GetTrainingCountAsync(userId);
 
         return Result.Ok(highLevelProfileInfo);
     }
@@ -43,7 +36,7 @@ public class TrainingResultsService : ITrainingResultsService
     public async Task<Result<IEnumerable<HighLevelTrainingResultDto>>> GetHighLevelTrainingResultsAsync(int userId)
     {
         IEnumerable<HighLevelTrainingResultDto> highLevelTrainingResults =
-            await _unitOfWork.TrainingResultsRepository.GetBestResultsAsync(userId);
+            await unitOfWork.TrainingResultsRepository.GetBestResultsAsync(userId);
 
         return Result.Ok(highLevelTrainingResults);
     }
@@ -51,7 +44,7 @@ public class TrainingResultsService : ITrainingResultsService
     public async Task<Result<IEnumerable<LeaderboardEntryDto>>> GetLeaderboardAsync(LeaderboardFilterDto dto)
     {
         IEnumerable<LeaderboardEntryDto> leaderboardEntries =
-            await _unitOfWork.TrainingResultsRepository.GetLeaderboardAsync(dto);
+            await unitOfWork.TrainingResultsRepository.GetLeaderboardAsync(dto);
 
         return Result.Ok(leaderboardEntries);
     }
