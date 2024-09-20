@@ -6,12 +6,8 @@ using Typro.Domain.Database.Models;
 
 namespace Typro.Infrastructure.Repositories.Auth;
 
-public class TokenRepository : DatabaseConnectable, ITokenRepository
+public class TokenRepository(ConnectionWrapper connectionWrapper) : DatabaseConnectable(connectionWrapper), ITokenRepository
 {
-    public TokenRepository(ConnectionWrapper connectionWrapper) : base(connectionWrapper)
-    {
-    }
-
     public Task<int> CreateRefreshTokenAsync(RefreshToken model)
         => ConnectionWrapper.Connection.ExecuteAsync(RefreshTokenQueries.CreateToken, model,
             ConnectionWrapper.Transaction);

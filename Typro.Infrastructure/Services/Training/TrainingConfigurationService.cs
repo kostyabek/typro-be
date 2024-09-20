@@ -8,26 +8,15 @@ using Typro.Domain.Models.Result.Errors;
 
 namespace Typro.Infrastructure.Services.Training;
 
-public class TrainingConfigurationService : ITrainingConfigurationService
+public class TrainingConfigurationService(
+    IUnitOfWork unitOfWork,
+    IUserIdentityService userIdentityService,
+    IUserService userService) : ITrainingConfigurationService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IUserIdentityService _userIdentityService;
-    private readonly IUserService _userService;
-
-    public TrainingConfigurationService(
-        IUnitOfWork unitOfWork,
-        IUserIdentityService userIdentityService,
-        IUserService userService)
-    {
-        _unitOfWork = unitOfWork;
-        _userIdentityService = userIdentityService;
-        _userService = userService;
-    }
-
     public async Task<Result<int>> CreateDefaultTrainingConfigurationAsync()
     {
         int generatedTrainingConfigurationId =
-            await _unitOfWork.TrainingConfigurationRepository.CreateDefaultTrainingConfigurationAsync();
+            await unitOfWork.TrainingConfigurationRepository.CreateDefaultTrainingConfigurationAsync();
 
         return Result.Ok(generatedTrainingConfigurationId);
     }
@@ -35,7 +24,7 @@ public class TrainingConfigurationService : ITrainingConfigurationService
     public async Task<Result<TrainingConfiguration>> GetTrainingConfigurationByIdAsync(int trainingConfigurationId)
     {
         TrainingConfiguration? trainingConfiguration =
-            await _unitOfWork.TrainingConfigurationRepository
+            await unitOfWork.TrainingConfigurationRepository
                 .GetTrainingConfigurationByIdAsync(trainingConfigurationId);
 
         return trainingConfiguration is null
@@ -45,8 +34,8 @@ public class TrainingConfigurationService : ITrainingConfigurationService
 
     public async Task<Result> UpdateTrainingConfigurationAsync(TrainingConfigurationDto dto)
     {
-        int userId = _userIdentityService.UserId;
-        Result<Domain.Database.Models.User>? userResult = await _userService.GetUserByIdAsync(userId);
+        int userId = userIdentityService.UserId;
+        Result<Domain.Database.Models.User>? userResult = await userService.GetUserByIdAsync(userId);
         if (userResult.IsFailed)
         {
             return userResult.ToResult();
@@ -64,7 +53,7 @@ public class TrainingConfigurationService : ITrainingConfigurationService
             IsPunctuationEnabled = dto.IsPunctuationEnabled
         };
 
-        await _unitOfWork.TrainingConfigurationRepository.UpdateTrainingConfigurationAsync(trainingConfiguration);
+        await unitOfWork.TrainingConfigurationRepository.UpdateTrainingConfigurationAsync(trainingConfiguration);
 
         return Result.Ok();
     }

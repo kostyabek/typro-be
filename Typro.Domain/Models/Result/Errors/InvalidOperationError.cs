@@ -1,11 +1,7 @@
 ﻿using FluentResults;
 
-namespace Typro.Domain.Models.Result.Errors
+namespace Typro.Domain.Models.Result.Errors;
+
+public class InvalidOperationError(string msg) : Error(msg)
 {
-    public class InvalidOperationError : Error
-    {
-        public InvalidOperationError(string msg) : base(msg)
-        {
-        }
-    }
 }

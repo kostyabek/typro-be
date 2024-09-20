@@ -13,52 +13,41 @@ namespace Typro.Presentation.Controllers;
 [ApiController]
 [Route("user")]
 [Authorize]
-public class UserController : ControllerBase
+public class UserController(
+    IUserIdentityService userIdentityService,
+    ITrainingResultsService trainingResultsService,
+    IUserService userService) : ControllerBase
 {
-    private readonly IUserIdentityService _userIdentityService;
-    private readonly ITrainingResultsService _trainingResultsService;
-    private readonly IUserService _userService;
-
-    public UserController(
-        IUserIdentityService userIdentityService,
-        ITrainingResultsService trainingResultsService,
-        IUserService userService)
-    {
-        _userIdentityService = userIdentityService;
-        _trainingResultsService = trainingResultsService;
-        _userService = userService;
-    }
-
     [HttpGet("nickname")]
     public async Task<IActionResult> GetNicknameAsync()
     {
-        int userId = _userIdentityService.UserId;
-        Result<string> result = await _userService.GetNicknameByIdAsync(userId);
+        int userId = userIdentityService.UserId;
+        Result<string> result = await userService.GetNicknameByIdAsync(userId);
         return result.ToActionResult();
     }
 
     [HttpGet("high-level-stats-info")]
     public async Task<IActionResult> GetHighLevelProfileInfoAsync()
     {
-        int userId = _userIdentityService.UserId;
-        Result<HighLevelProfileInfoDto> result = await _trainingResultsService.GetHighLevelProfileInfoAsync(userId);
+        int userId = userIdentityService.UserId;
+        Result<HighLevelProfileInfoDto> result = await trainingResultsService.GetHighLevelProfileInfoAsync(userId);
         return result.ToActionResult();
     }
 
     [HttpGet("high-level-training-results")]
     public async Task<IActionResult> GetHighLevelTrainingResultsAsync()
     {
-        int userId = _userIdentityService.UserId;
+        int userId = userIdentityService.UserId;
         Result<IEnumerable<HighLevelTrainingResultDto>> result =
-            await _trainingResultsService.GetHighLevelTrainingResultsAsync(userId);
+            await trainingResultsService.GetHighLevelTrainingResultsAsync(userId);
         return result.ToActionResult();
     }
 
     [HttpPatch]
     public async Task<IActionResult> UpdateNicknameByIdAsync([FromBody] string nickname)
     {
-        int userId = _userIdentityService.UserId;
-        Result<string> result = await _userService.UpdateNicknameByIdAsync(nickname, userId);
+        int userId = userIdentityService.UserId;
+        Result<string> result = await userService.UpdateNicknameByIdAsync(nickname, userId);
         return result.ToActionResult();
     }
 
@@ -66,12 +55,12 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetWordsPerMinuteToAccuracyStatsAsync(
         [FromQuery] GetWordsPerMinuteToAccuracyStatsRequest request)
     {
-        int userId = _userIdentityService.UserId;
+        int userId = userIdentityService.UserId;
         var dto = new WordsPerMinuteToAccuracyRequestDto(userId, request.FromDate, request.LanguageId,
             request.WordsModeType, request.TimeModeType);
 
         Result<IEnumerable<WordsPerMinuteToAccuracyDto>> result =
-            await _userService.GetWordsPerMinuteToAccuracyStatsAsync(dto);
+            await userService.GetWordsPerMinuteToAccuracyStatsAsync(dto);
         return result.ToActionResult();
     }
 }

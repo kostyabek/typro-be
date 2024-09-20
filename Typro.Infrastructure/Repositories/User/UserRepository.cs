@@ -7,12 +7,8 @@ using Typro.Application.Repositories;
 
 namespace Typro.Infrastructure.Repositories.User;
 
-public class UserRepository : DatabaseConnectable, IUserRepository
+public class UserRepository(ConnectionWrapper connectionWrapper) : DatabaseConnectable(connectionWrapper), IUserRepository
 {
-    public UserRepository(ConnectionWrapper connectionWrapper) : base(connectionWrapper)
-    {
-    }
-
     public Task<int> CreateUserAsync(CreateUserDto model)
         => ConnectionWrapper.Connection.ExecuteScalarAsync<int>(UserQueries.InsertUser, model,
             transaction: ConnectionWrapper.Transaction);

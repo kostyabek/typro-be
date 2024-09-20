@@ -9,12 +9,8 @@ using Typro.Application.Repositories;
 
 namespace Typro.Infrastructure.Repositories.Training;
 
-public class TrainingResultsRepository : DatabaseConnectable, ITrainingResultsRepository
+public class TrainingResultsRepository(ConnectionWrapper connectionWrapper) : DatabaseConnectable(connectionWrapper), ITrainingResultsRepository
 {
-    public TrainingResultsRepository(ConnectionWrapper connectionWrapper) : base(connectionWrapper)
-    {
-    }
-
     public Task<int> CreateTrainingResultsAsync(FullTrainingResultsDto dto)
         => ConnectionWrapper.Connection.ExecuteScalarAsync<int>(TrainingResultsQueries.InsertTrainingResults,
             new

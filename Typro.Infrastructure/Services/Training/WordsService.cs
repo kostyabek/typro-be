@@ -5,18 +5,11 @@ using Typro.Domain.Database.Models;
 
 namespace Typro.Infrastructure.Services.Training;
 
-public class WordsService : IWordsService
+public class WordsService(IUnitOfWork unitOfWork) : IWordsService
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public WordsService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
-
     public async Task<Result<IEnumerable<Word>>> GetNRandomWordsByLanguageAsync(int languageId, int numberOfWords)
     {
-        IEnumerable<Word>? words = await _unitOfWork.WordRepository.GetNRandomWordsByLanguageAsync(languageId, numberOfWords);
+        IEnumerable<Word>? words = await unitOfWork.WordRepository.GetNRandomWordsByLanguageAsync(languageId, numberOfWords);
         return Result.Ok(words);
     }
 }

@@ -6,12 +6,8 @@ using Typro.Domain.Database.Models;
 
 namespace Typro.Infrastructure.Repositories.Training;
 
-public class WordRepository : DatabaseConnectable, IWordRepository
+public class WordRepository(ConnectionWrapper connectionWrapper) : DatabaseConnectable(connectionWrapper), IWordRepository
 {
-    public WordRepository(ConnectionWrapper connectionWrapper) : base(connectionWrapper)
-    {
-    }
-
     public Task<IEnumerable<Word>> GetNRandomWordsByLanguageAsync(int languageId, int numberOfWords)
         => ConnectionWrapper.Connection.QueryAsync<Word>(WordsQueries.GetNRandomWordsByLanguage,
             new

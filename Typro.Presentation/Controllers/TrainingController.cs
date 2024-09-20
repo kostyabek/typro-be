@@ -15,40 +15,20 @@ namespace Typro.Presentation.Controllers;
 
 [ApiController]
 [Route("training")]
-public class TrainingController : ControllerBase
+public class TrainingController(
+    ITrainingConfigurationService trainingConfigurationService,
+    ISupportedLanguagesService supportedLanguagesService,
+    IValidator<UpdateTrainingConfigurationRequest> updateTrainingConfigurationRequestValidator,
+    ITextGenerationService textGenerationService,
+    IUserIdentityService userIdentityService,
+    ITrainingResultsService trainingResultsService,
+    IPreparedMultiplayerTextsService preparedMultiplayerTextsService) : ControllerBase
 {
-    private readonly IValidator<UpdateTrainingConfigurationRequest> _updateTrainingConfigurationRequestValidator;
-
-    private readonly ISupportedLanguagesService _supportedLanguagesService;
-    private readonly ITrainingConfigurationService _trainingConfigurationService;
-    private readonly ITextGenerationService _textGenerationService;
-    private readonly IUserIdentityService _userIdentityService;
-    private readonly ITrainingResultsService _trainingResultsService;
-    private readonly IPreparedMultiplayerTextsService _preparedMultiplayerTextsService;
-
-    public TrainingController(
-        ITrainingConfigurationService trainingConfigurationService,
-        ISupportedLanguagesService supportedLanguagesService,
-        IValidator<UpdateTrainingConfigurationRequest> updateTrainingConfigurationRequestValidator,
-        ITextGenerationService textGenerationService,
-        IUserIdentityService userIdentityService,
-        ITrainingResultsService trainingResultsService,
-        IPreparedMultiplayerTextsService preparedMultiplayerTextsService)
-    {
-        _trainingConfigurationService = trainingConfigurationService;
-        _supportedLanguagesService = supportedLanguagesService;
-        _updateTrainingConfigurationRequestValidator = updateTrainingConfigurationRequestValidator;
-        _textGenerationService = textGenerationService;
-        _userIdentityService = userIdentityService;
-        _trainingResultsService = trainingResultsService;
-        _preparedMultiplayerTextsService = preparedMultiplayerTextsService;
-    }
-
     [HttpGet("supported-languages")]
     public async Task<IActionResult> GetSupportedLanguagesAsync()
     {
         Result<IEnumerable<SupportedLanguageDto>>
-            result = await _supportedLanguagesService.GetSupportedLanguagesAsync();
+            result = await supportedLanguagesService.GetSupportedLanguagesAsync();
         return result.ToActionResult();
     }
 
@@ -57,7 +37,7 @@ public class TrainingController : ControllerBase
     public async Task<IActionResult> GetTrainingConfigurationByIdAsync([FromRoute] int configurationId)
     {
         Result<TrainingConfiguration> result =
-            await _trainingConfigurationService.GetTrainingConfigurationByIdAsync(configurationId);
+            await trainingConfigurationService.GetTrainingConfigurationByIdAsync(configurationId);
         return result.ToActionResult();
     }
 
@@ -66,7 +46,7 @@ public class TrainingController : ControllerBase
     public async Task<IActionResult> UpdateTrainingConfigurationAsync(
         [FromBody] UpdateTrainingConfigurationRequest request)
     {
-        ValidationResult validationResult = await _updateTrainingConfigurationRequestValidator.ValidateAsync(request);
+        ValidationResult validationResult = await updateTrainingConfigurationRequestValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
             return validationResult.ToActionResult();
@@ -79,7 +59,7 @@ public class TrainingController : ControllerBase
             request.TimeModeType,
             request.LanguageId);
 
-        Result result = await _trainingConfigurationService.UpdateTrainingConfigurationAsync(dto);
+        Result result = await trainingConfigurationService.UpdateTrainingConfigurationAsync(dto);
         return result.ToActionResult();
     }
 
@@ -93,14 +73,14 @@ public class TrainingController : ControllerBase
             request.TimeMode,
             request.LanguageId);
 
-        Result<IEnumerable<string>> wordsResult = await _textGenerationService.GenerateText(dto);
+        Result<IEnumerable<string>> wordsResult = await textGenerationService.GenerateText(dto);
         if (wordsResult.IsFailed)
         {
             return wordsResult.ToActionResult();
         }
 
         Result<IEnumerable<IEnumerable<char>>> symbolsResult =
-            _textGenerationService.ConvertWordsToSymbols(wordsResult.Value);
+            textGenerationService.ConvertWordsToSymbols(wordsResult.Value);
 
         return symbolsResult.ToActionResult();
     }
@@ -120,7 +100,7 @@ public class TrainingController : ControllerBase
             request.LanguageId);
 
         Result<PreparedMultiplayerTextInfoDto> result =
-            await _preparedMultiplayerTextsService.GetOrCreateTrainingTextAsync(dto, lobbyId, isForceRewrite);
+            await preparedMultiplayerTextsService.GetOrCreateTrainingTextAsync(dto, lobbyId, isForceRewrite);
 
         return result.ToActionResult();
     }
@@ -129,7 +109,7 @@ public class TrainingController : ControllerBase
     [Authorize]
     public async Task<IActionResult> CheckIfLobbyExistsAsync([FromQuery] string lobbyId)
     {
-        Result<bool> result = await _preparedMultiplayerTextsService.CheckIfLobbyExists(lobbyId);
+        Result<bool> result = await preparedMultiplayerTextsService.CheckIfLobbyExists(lobbyId);
         return result.ToActionResult();
     }
     
@@ -137,7 +117,7 @@ public class TrainingController : ControllerBase
     [Authorize]
     public async Task<IActionResult> DeleteLobbyInfoAsync([FromQuery] string lobbyId)
     {
-        Result result = await _preparedMultiplayerTextsService.DeleteLobby(lobbyId);
+        Result result = await preparedMultiplayerTextsService.DeleteLobby(lobbyId);
         return result.ToActionResult();
     }
 
@@ -146,7 +126,7 @@ public class TrainingController : ControllerBase
     public async Task<IActionResult> CreateTrainingResultsAsync(
         [FromBody] CreateTrainingResultsRequest request)
     {
-        int userId = _userIdentityService.UserId;
+        int userId = userIdentityService.UserId;
         var dto = new FullTrainingResultsDto(
             -1.0f,
             -1.0f,
@@ -158,7 +138,7 @@ public class TrainingController : ControllerBase
             request.DateConducted,
             userId);
 
-        Result<int> result = await _trainingResultsService.CreateTrainingResultsAsync(dto);
+        Result<int> result = await trainingResultsService.CreateTrainingResultsAsync(dto);
         return result.ToActionResult();
     }
 
@@ -174,7 +154,7 @@ public class TrainingController : ControllerBase
             request.TimeInMilliseconds,
             request.CharactersStats);
 
-        Result<int> result = await _trainingResultsService.UpdateTrainingResultsAsync(dto);
+        Result<int> result = await trainingResultsService.UpdateTrainingResultsAsync(dto);
         return result.ToActionResult();
     }
 }

@@ -13,19 +13,11 @@ using Typro.Domain.Models.Result.Errors;
 
 namespace Typro.Infrastructure.Services.Auth;
 
-public class TokenService : ITokenService
+public class TokenService(
+    IOptions<TokenOptions> tokenOptions,
+    IUnitOfWork unitOfWork) : ITokenService
 {
-    private readonly TokenOptions _tokenOptions;
-
-    private readonly IUnitOfWork _unitOfWork;
-
-    public TokenService(
-        IOptions<TokenOptions> tokenOptions,
-        IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-        _tokenOptions = tokenOptions.Value;
-    }
+    private readonly TokenOptions _tokenOptions = tokenOptions.Value;
 
     public string GenerateAccessToken(Domain.Database.Models.User user)
     {
@@ -62,14 +54,14 @@ public class TokenService : ITokenService
             UserId = userId
         };
 
-        await _unitOfWork.TokenRepository.CreateRefreshTokenAsync(refreshTokenModel);
+        await unitOfWork.TokenRepository.CreateRefreshTokenAsync(refreshTokenModel);
 
         return refreshTokenModel;
     }
 
     public async Task<Result> ValidateRefreshToken(string token)
     {
-        RefreshToken? refreshToken = await _unitOfWork.TokenRepository.GetRefreshTokenByTokenAsync(token);
+        RefreshToken? refreshToken = await unitOfWork.TokenRepository.GetRefreshTokenByTokenAsync(token);
         if (refreshToken is null || refreshToken.IsRevoked || refreshToken.ExpirationDate < DateTime.UtcNow)
         {
             return Result.Fail(new InvalidOperationError("Invalid token."));

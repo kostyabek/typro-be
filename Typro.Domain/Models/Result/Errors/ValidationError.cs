@@ -1,11 +1,7 @@
 ﻿using FluentResults;
 
-namespace Typro.Domain.Models.Result.Errors
+namespace Typro.Domain.Models.Result.Errors;
+
+public class ValidationError(string msg) : Error(msg)
 {
-    public class ValidationError : Error
-    {
-        public ValidationError(string msg) : base(msg)
-        {
-        }
-    }
 }

@@ -1,14 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Typro.Presentation", "Typro.Presentation\Typro.Presentation.csproj", "{C9A23554-3FA8-4170-8F02-912DFFBD8CBC}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34525.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Typro.Presentation", "Typro.Presentation\Typro.Presentation.csproj", "{C9A23554-3FA8-4170-8F02-912DFFBD8CBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Typro.Infrastructure", "Typro.Infrastructure\Typro.Infrastructure.csproj", "{BB65B8B7-558C-480F-8D1F-96B592819003}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Typro.Infrastructure", "Typro.Infrastructure\Typro.Infrastructure.csproj", "{BB65B8B7-558C-480F-8D1F-96B592819003}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Typro.Application", "Typro.Application\Typro.Application.csproj", "{53BBF808-D9FB-4541-ADA3-CC293E617765}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Typro.Application", "Typro.Application\Typro.Application.csproj", "{53BBF808-D9FB-4541-ADA3-CC293E617765}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Typro.Domain", "Typro.Domain\Typro.Domain.csproj", "{452F2269-76AD-45D1-BF17-7186D6F399D9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordsImporter", "WordsImporter\WordsImporter.csproj", "{C28749CB-0139-4C45-9107-7863BF7F5EF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Typro.Domain", "Typro.Domain\Typro.Domain.csproj", "{452F2269-76AD-45D1-BF17-7186D6F399D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,9 +33,8 @@ Global
 		{452F2269-76AD-45D1-BF17-7186D6F399D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{452F2269-76AD-45D1-BF17-7186D6F399D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{452F2269-76AD-45D1-BF17-7186D6F399D9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C28749CB-0139-4C45-9107-7863BF7F5EF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C28749CB-0139-4C45-9107-7863BF7F5EF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C28749CB-0139-4C45-9107-7863BF7F5EF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C28749CB-0139-4C45-9107-7863BF7F5EF6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
